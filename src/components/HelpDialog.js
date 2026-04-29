@@ -49,28 +49,34 @@ export class HelpDialog {
     bottomCover.setDepth(58);
     this._add(bottomCover);
 
+    // Half-content width for positioning text that shouldn't exceed panel
+    const halfW = panelW / 2;
+    const pad = Math.round(30 * sf);
+
     let y = Math.round(50 * sf);
 
     // Title
-    y = this._addText('HOW TO PLAY', 0, y, {
+    const title = this._addText('HOW TO PLAY', 0, y, {
       ...FONT.UI, fontSize: `${Math.round(56 * sf)}px`, color: '#FFD700',
-    }).y + Math.round(70 * sf);
+    });
+    y = title.y + title.height + Math.round(30 * sf);
 
     y = this._addSection('SPIN & MATCH', [
       'Spin the slot machine to get numbers',
       'Match numbers to your bingo card',
       'Close all cells in a row, column, or diagonal to win',
       'Compete against 7 bots — place 1st for max coins!',
-    ], y);
+    ], y, halfW);
 
     y = this._addDivider(y);
 
     // Timing bar section
     y = this._addSectionHeader('TIMING BAR', 0, y);
-    y += Math.round(10 * sf);
-    y = this._addText('Hit SPIN when the marker is in the zone:', 0, y, {
-      ...FONT.LABEL, fontSize: `${Math.round(38 * sf)}px`, color: '#A0A0C0',
-    }).y + Math.round(16 * sf);
+    const timingDesc = this._addText('Hit SPIN when the marker is in the zone:', 0, y, {
+      ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#A0A0C0',
+      wordWrap: { width: panelW - pad * 2 },
+    });
+    y = timingDesc.y + timingDesc.height + Math.round(12 * sf);
 
     const zones = [
       { label: 'PERFECT', color: '#2ECC71', desc: 'Best charge & hit rate' },
@@ -80,31 +86,20 @@ export class HelpDialog {
     ];
 
     zones.forEach(z => {
-      const row = scene.add.container(0, y);
-      const dot = scene.add.text(Math.round(-300 * sf), 0, '●', {
-        fontSize: `${Math.round(32 * sf)}px`, color: z.color,
-      }).setOrigin(0, 0.5);
-      const lbl = scene.add.text(Math.round(-260 * sf), 0, z.label, {
-        ...FONT.UI, fontSize: `${Math.round(36 * sf)}px`, color: z.color,
-      }).setOrigin(0, 0.5);
-      const dsc = scene.add.text(Math.round(-60 * sf), 0, z.desc, {
-        ...FONT.LABEL, fontSize: `${Math.round(32 * sf)}px`, color: '#A0A0C0',
-      }).setOrigin(0, 0.5);
-      row.add([dot, lbl, dsc]);
-      this.content.add(row);
-      this._add(row);
-      y += Math.round(52 * sf);
+      const { rowY, rowH } = this._addKeyValueRow(y, z.label, z.desc, z.color, halfW, sf);
+      y = rowY + rowH + Math.round(8 * sf);
     });
 
-    y += Math.round(10 * sf);
+    y += Math.round(8 * sf);
     y = this._addDivider(y);
 
     // Jackpot meter section
     y = this._addSectionHeader('JACKPOT METER', 0, y);
-    y += Math.round(10 * sf);
-    y = this._addText('Fill 5 segments to earn a jackpot ball!', 0, y, {
-      ...FONT.LABEL, fontSize: `${Math.round(38 * sf)}px`, color: '#A0A0C0',
-    }).y + Math.round(20 * sf);
+    const meterDesc = this._addText('Fill 5 segments to earn a jackpot ball!', 0, y, {
+      ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#A0A0C0',
+      wordWrap: { width: panelW - pad * 2 },
+    });
+    y = meterDesc.y + meterDesc.height + Math.round(14 * sf);
 
     // Charge rate table
     const charges = [
@@ -115,50 +110,54 @@ export class HelpDialog {
     ];
 
     charges.forEach(([label, value, color]) => {
-      const row = scene.add.container(0, y);
-      const lbl = scene.add.text(Math.round(-280 * sf), 0, label, {
+      const row = this.scene.add.container(0, y);
+      const lbl = this.scene.add.text(-halfW + pad, 0, label, {
         ...FONT.UI, fontSize: `${Math.round(34 * sf)}px`, color,
-      }).setOrigin(0, 0.5);
-      const val = scene.add.text(Math.round(280 * sf), 0, value, {
+      }).setOrigin(0, 0);
+      const val = this.scene.add.text(halfW - pad, 0, value, {
         ...FONT.UI, fontSize: `${Math.round(34 * sf)}px`, color,
-      }).setOrigin(1, 0.5);
+      }).setOrigin(1, 0);
       row.add([lbl, val]);
       this.content.add(row);
       this._add(row);
-      y += Math.round(46 * sf);
+      const rowH = Math.max(lbl.height, val.height);
+      y += rowH + Math.round(10 * sf);
     });
 
     y += Math.round(8 * sf);
-    y = this._addText('★ Jackpot symbol instantly adds +30', 0, y, {
-      ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#FFD700',
-    }).y + Math.round(12 * sf);
-    y = this._addText('Use a jackpot ball to close ANY open cell', 0, y, {
-      ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#A0A0C0',
-    }).y + Math.round(10 * sf);
+    const jackNote1 = this._addText('★ Jackpot symbol instantly adds +30', 0, y, {
+      ...FONT.LABEL, fontSize: `${Math.round(32 * sf)}px`, color: '#FFD700',
+      wordWrap: { width: panelW - pad * 2 },
+    });
+    y = jackNote1.y + jackNote1.height + Math.round(8 * sf);
+    const jackNote2 = this._addText('Use a jackpot ball to close ANY open cell', 0, y, {
+      ...FONT.LABEL, fontSize: `${Math.round(32 * sf)}px`, color: '#A0A0C0',
+      wordWrap: { width: panelW - pad * 2 },
+    });
+    y = jackNote2.y + jackNote2.height + Math.round(10 * sf);
 
     y = this._addDivider(y);
 
     // Special symbols section
     y = this._addSectionHeader('SPECIAL SYMBOLS', 0, y);
-    y += Math.round(10 * sf);
 
-    const symbolW = Math.round(80 * sf);
-    const symbolH = Math.round(60 * sf);
+    const symbolW = Math.round(70 * sf);
+    const symbolH = Math.round(52 * sf);
 
     // Jackpot badge
-    y = this._addSymbolBadge(y, symbolW, symbolH, {
+    y = this._addSymbolBadge(y, symbolW, symbolH, halfW, pad, {
       fill: 0x2A1A00, border: COLOR.GOLD, text: '★', textColor: '#FFD700',
       name: 'JACKPOT', desc: 'Instantly adds +30 meter charge',
     });
 
     // Wild badge
-    y = this._addSymbolBadge(y, symbolW, symbolH, {
+    y = this._addSymbolBadge(y, symbolW, symbolH, halfW, pad, {
       fill: 0x1A0030, border: COLOR.PURPLE, text: 'W', textColor: '#B060E0',
       name: 'WILD', desc: 'Choose a column — next spin guarantees a match',
     });
 
     // Multiplier badge
-    y = this._addSymbolBadge(y, symbolW, symbolH, {
+    y = this._addSymbolBadge(y, symbolW, symbolH, halfW, pad, {
       fill: 0x2A1500, border: COLOR.ORANGE_HOT, text: '×2', textColor: '#FF8C00',
       name: 'MULTIPLIER', desc: 'Doubles next spin\'s meter charge',
     });
@@ -171,7 +170,7 @@ export class HelpDialog {
     const btn = this._makeButton(0, y, btnW, btnH, 'GOT IT!');
     this._add(btn);
 
-    // Update content container height for mask
+    // Update content container height for scrolling
     this.contentHeight = y + btnH + Math.round(40 * sf);
 
     // Touch scrolling
@@ -210,27 +209,28 @@ export class HelpDialog {
   _addSectionHeader(text, x, y) {
     const sf = this.sf;
     const t = this.scene.add.text(x, y, text, {
-      ...FONT.UI, fontSize: `${Math.round(44 * sf)}px`, color: '#F0F0FF',
+      ...FONT.UI, fontSize: `${Math.round(42 * sf)}px`, color: '#F0F0FF',
     }).setOrigin(0.5, 0);
     t.setDepth(57);
     this.content.add(t);
     this._add(t);
-    return t.y + Math.round(52 * sf);
+    return t.y + t.height + Math.round(12 * sf);
   }
 
-  _addSection(title, bullets, startY) {
+  _addSection(title, bullets, startY, halfW) {
     const sf = this.sf;
+    const pad = Math.round(30 * sf);
     let y = this._addSectionHeader(title, 0, startY);
 
     bullets.forEach(bullet => {
-      const t = this.scene.add.text(Math.round(-20 * sf), y, `• ${bullet}`, {
-        ...FONT.LABEL, fontSize: `${Math.round(36 * sf)}px`, color: '#C0C0E0',
-        wordWrap: { width: Math.round(740 * sf) },
+      const t = this.scene.add.text(0, y, `• ${bullet}`, {
+        ...FONT.LABEL, fontSize: `${Math.round(32 * sf)}px`, color: '#C0C0E0',
+        wordWrap: { width: (halfW - pad) * 2 },
       }).setOrigin(0.5, 0);
       t.setDepth(57);
       this.content.add(t);
       this._add(t);
-      y += t.height + Math.round(10 * sf);
+      y += t.height + Math.round(6 * sf);
     });
 
     return y;
@@ -238,51 +238,75 @@ export class HelpDialog {
 
   _addDivider(y) {
     const sf = this.sf;
+    const halfW = this.scene.scale.width < 500 ? Math.round(200 * sf) : Math.round(360 * sf);
     const line = this.scene.add.graphics();
     line.lineStyle(1, COLOR.BORDER, 0.5);
-    line.lineBetween(Math.round(-360 * sf), 0, Math.round(360 * sf), 0);
+    line.lineBetween(-halfW, 0, halfW, 0);
     line.setPosition(0, y);
     line.setDepth(57);
     this.content.add(line);
     this._add(line);
-    return y + Math.round(24 * sf);
+    return y + Math.round(20 * sf);
   }
 
-  _addSymbolBadge(y, w, h, opts) {
+  _addKeyValueRow(y, label, desc, labelColor, halfW, sf) {
+    const pad = Math.round(30 * sf);
+    const row = this.scene.add.container(0, y);
+
+    const lbl = this.scene.add.text(-halfW + pad, 0, label, {
+      ...FONT.UI, fontSize: `${Math.round(32 * sf)}px`, color: labelColor,
+    }).setOrigin(0, 0);
+    const dsc = this.scene.add.text(-halfW + pad + lbl.width + Math.round(14 * sf), 0, desc, {
+      ...FONT.LABEL, fontSize: `${Math.round(30 * sf)}px`, color: '#A0A0C0',
+    }).setOrigin(0, 0);
+
+    row.add([lbl, dsc]);
+    this.content.add(row);
+    this._add(row);
+
+    const rowH = Math.max(lbl.height, dsc.height);
+    return { rowY: y, rowH };
+  }
+
+  _addSymbolBadge(y, w, h, halfW, pad, opts) {
     const sf = this.sf;
+    const badgeX = -halfW + pad + w / 2;
+    const textX = badgeX + w / 2 + Math.round(14 * sf);
+    const descWidth = (halfW - pad) * 2 - (textX + halfW);
+
     const row = this.scene.add.container(0, y);
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(opts.fill, 1);
     bg.lineStyle(2, opts.border, 0.8);
-    bg.fillRoundedRect(-w / 2, -h / 2, w, h, 10);
-    bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 10);
-    bg.setPosition(Math.round(-320 * sf), 0);
+    bg.fillRoundedRect(badgeX - w / 2, 0, w, h, 10);
+    bg.strokeRoundedRect(badgeX - w / 2, 0, w, h, 10);
     row.add(bg);
     this._add(bg);
 
-    const symText = this.scene.add.text(Math.round(-320 * sf), 0, opts.text, {
-      ...FONT.UI, fontSize: `${Math.round(h * 0.6)}px`, color: opts.textColor,
+    const symText = this.scene.add.text(badgeX, h / 2, opts.text, {
+      ...FONT.UI, fontSize: `${Math.round(h * 0.55)}px`, color: opts.textColor,
     }).setOrigin(0.5);
     row.add(symText);
     this._add(symText);
 
-    const name = this.scene.add.text(Math.round(-220 * sf), Math.round(-12 * sf), opts.name, {
-      ...FONT.UI, fontSize: `${Math.round(32 * sf)}px`, color: '#F0F0FF',
-    }).setOrigin(0, 0.5);
+    const name = this.scene.add.text(textX, 0, opts.name, {
+      ...FONT.UI, fontSize: `${Math.round(30 * sf)}px`, color: '#F0F0FF',
+    }).setOrigin(0, 0);
     row.add(name);
     this._add(name);
 
-    const desc = this.scene.add.text(Math.round(-220 * sf), Math.round(16 * sf), opts.desc, {
-      ...FONT.LABEL, fontSize: `${Math.round(28 * sf)}px`, color: '#A0A0C0',
-      wordWrap: { width: Math.round(460 * sf) },
+    const desc = this.scene.add.text(textX, name.height + Math.round(4 * sf), opts.desc, {
+      ...FONT.LABEL, fontSize: `${Math.round(26 * sf)}px`, color: '#A0A0C0',
+      wordWrap: { width: Math.max(descWidth, 100) },
     }).setOrigin(0, 0);
     row.add(desc);
     this._add(desc);
 
+    const rowH = Math.max(h, name.height + Math.round(4 * sf) + desc.height);
     this.content.add(row);
     this._add(row);
-    return y + Math.round(80 * sf);
+    return y + rowH + Math.round(12 * sf);
   }
 
   _makeButton(x, y, w, h, label) {
