@@ -207,7 +207,17 @@ export class TimingBar {
   }
 
   canAutoLock() {
-    return this._canLock;
+    if (!this.active || this.locked) return false;
+    if (this._canLock) return true;
+    return false;
+  }
+
+  isInStartZone() {
+    if (!this._startZone || this._startZone === 'MISS') return false;
+    const position = Phaser.Math.Clamp(
+      (this.marker.x - this.barX) / this.BAR_W, 0, 1
+    );
+    return this.timingManager.getZone(position) === this._startZone;
   }
 
   destroy() {}

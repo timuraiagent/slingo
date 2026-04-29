@@ -314,11 +314,21 @@ export class MatchScene extends Phaser.Scene {
 
   _resetAutoFire() {
     if (this.spinTimer) this.spinTimer.remove();
-    this.spinTimer = this.time.delayedCall(3000, () => {
+    const delay = 2500 + Math.random() * 2000; // 2.5–4.5s random delay
+    this.spinTimer = this.time.delayedCall(delay, () => {
       if (this.stateMachine.isIdle() && this.matchActive) {
-        // Only auto-fire if the timing bar has traversed enough
-        if (!this.timingBar.canAutoLock()) {
-          this._resetAutoFire();
+        // Don't auto-fire if still in starting zone or hasn't traversed
+        if (!this.timingBar.canAutoLock() || this.timingBar.isInStartZone()) {
+          // Retry sooner since we just need to wait for the marker to move
+          this.spinTimer = this.time.delayedCall(400, () => {
+            if (this.stateMachine.isIdle() && this.matchActive) {
+              if (this.timingBar.canAutoLock() && !this.timingBar.isInStartZone()) {
+                this._onSpin();
+              } else {
+                this._resetAutoFire();
+              }
+            }
+          });
           return;
         }
         this._onSpin();
