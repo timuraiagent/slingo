@@ -96,10 +96,11 @@ export class BingoCard {
     const key = `${col},${row}`;
     const cell = this.cells.find(c => c.col === col && c.row === row);
     if (!cell) return;
-    if (this.cardManager.closed.has(key)) return;
+    const alreadyClosed = this.cardManager.closed.has(key);
 
     this.cardManager.closeCell(col, row);
     this._redrawCell(cell, 'CLOSED');
+    if (alreadyClosed) return;
 
     this.scene.tweens.add({
       targets: cell.container,
