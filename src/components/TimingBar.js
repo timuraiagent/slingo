@@ -31,9 +31,7 @@ export class TimingBar {
     this._elapsed = 0;
     this._fastMode = false;
     this._direction = 1; // 1 = forward (left→right), -1 = backward (right→left)
-    this._canLock = true;
-    this._startZone = null;
-    this._reachedEdge = false;
+    this._pendingAutoLock = false;
 
     const BAR_W = Math.round(Math.min(L.W - 60, 960 * L.sf));
     const BAR_H = L.TIMING_HEIGHT;
@@ -95,18 +93,12 @@ export class TimingBar {
   activate(fastMode = false) {
     this.active = true;
     this.locked = false;
+    this._pendingAutoLock = false;
     this._fastMode = fastMode;
 
     const currentPosition = Phaser.Math.Clamp(
       (this.marker.x - this.barX) / this.BAR_W, 0, 1
     );
-
-    const startZone = this.timingManager.getZone(currentPosition);
-    this._startZone = startZone;
-    this._reachedEdge = false;
-    // If starting in MISS zone, lock is allowed immediately;
-    // otherwise marker must reach an edge (position < 0.05 or > 0.95) first
-    this._canLock = (startZone === 'MISS');
 
     const duration = fastMode ? this.baseDuration / 2 : this.baseDuration;
 
@@ -150,9 +142,7 @@ export class TimingBar {
   reset() {
     this.active = false;
     this.locked = false;
-    this._canLock = true;
-    this._startZone = null;
-    this._reachedEdge = false;
+    this._pendingAutoLock = false;
   }
 
   setSpeed(fastMode) {
@@ -193,11 +183,15 @@ export class TimingBar {
       this.barY + this.BAR_H / 2
     );
 
-    // Track whether marker has reached at least one edge of the bar
-    if (!this._canLock && !this._reachedEdge) {
-      if (position < 0.05 || position > 0.95) {
-        this._reachedEdge = true;
-        this._canLock = true;
+    // Auto-lock: when requested, lock as soon as marker enters MISS zone
+    if (this._pendingAutoLock) {
+      const zone = this.timingManager.getZone(position);
+      if (zone === 'MISS') {
+        this._pendingAutoLock = false;
+        const result = this.lock();
+        if (result) {
+          bus.emit('timing:autoLocked', result);
+        }
       }
     }
   }
@@ -206,18 +200,8 @@ export class TimingBar {
     this.reset();
   }
 
-  canAutoLock() {
-    if (!this.active || this.locked) return false;
-    if (this._canLock) return true;
-    return false;
-  }
-
-  isInStartZone() {
-    if (!this._startZone || this._startZone === 'MISS') return false;
-    const position = Phaser.Math.Clamp(
-      (this.marker.x - this.barX) / this.BAR_W, 0, 1
-    );
-    return this.timingManager.getZone(position) === this._startZone;
+  requestAutoLock() {
+    this._pendingAutoLock = true;
   }
 
   destroy() {}

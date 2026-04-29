@@ -237,6 +237,7 @@ export class MatchScene extends Phaser.Scene {
     this._busOn('pressure:start', (data) => this._onPressureStart(data));
     this._busOn('pressure:end', () => this._onPressureEnd());
     this._busOn('streak:updated', (count) => this._onStreakUpdated(count));
+    this._busOn('timing:autoLocked', (result) => this._onAutoSpin(result));
 
     // Countdown overlay
     const overlay = this.add.graphics();
@@ -317,21 +318,7 @@ export class MatchScene extends Phaser.Scene {
     const delay = 2500 + Math.random() * 2000; // 2.5–4.5s random delay
     this.spinTimer = this.time.delayedCall(delay, () => {
       if (this.stateMachine.isIdle() && this.matchActive) {
-        // Don't auto-fire if still in starting zone or hasn't traversed
-        if (!this.timingBar.canAutoLock() || this.timingBar.isInStartZone()) {
-          // Retry sooner since we just need to wait for the marker to move
-          this.spinTimer = this.time.delayedCall(400, () => {
-            if (this.stateMachine.isIdle() && this.matchActive) {
-              if (this.timingBar.canAutoLock() && !this.timingBar.isInStartZone()) {
-                this._onSpin();
-              } else {
-                this._resetAutoFire();
-              }
-            }
-          });
-          return;
-        }
-        this._onSpin();
+        this.timingBar.requestAutoLock();
       }
     });
   }
@@ -376,6 +363,36 @@ export class MatchScene extends Phaser.Scene {
     this.slotMachine.spin(results);
 
     // Store for resolution
+    this._pendingResult = { number, zone, results };
+  }
+
+  _onAutoSpin(timingResult) {
+    if (!this.stateMachine.isIdle() || !this.matchActive) return;
+    this.stateMachine.setState(STATES.SPINNING);
+
+    this.controlZone.setSpinEnabled(false);
+    if (this.spinTimer) this.spinTimer.remove();
+
+    const { zone } = timingResult;
+
+    // Roll number — check for wild ball guarantee
+    let number;
+    if (this.wildGuaranteedColumn !== undefined && this.wildGuaranteedColumn !== null) {
+      const ranges = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
+      const [lo, hi] = ranges[this.wildGuaranteedColumn];
+      const openInCol = this.cardManager.getOpenNumbers().filter(n => n >= lo && n <= hi);
+      if (openInCol.length > 0) {
+        number = this.rngManager.getRng().pickFrom(openInCol);
+      } else {
+        number = this.rngManager.getSpinNumber(this.cardManager, zone);
+      }
+      this.wildGuaranteedColumn = null;
+    } else {
+      number = this.rngManager.getSpinNumber(this.cardManager, zone);
+    }
+
+    const results = this._buildReelResults(number);
+    this.slotMachine.spin(results);
     this._pendingResult = { number, zone, results };
   }
 
