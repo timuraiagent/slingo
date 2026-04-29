@@ -238,6 +238,7 @@ export class MatchScene extends Phaser.Scene {
     this._busOn('pressure:end', () => this._onPressureEnd());
     this._busOn('streak:updated', (count) => this._onStreakUpdated(count));
     this._busOn('timing:autoLocked', (result) => this._onAutoSpin(result));
+    this._busOn('timing:perfect', () => this._onPerfectTiming());
 
     // Countdown overlay
     const overlay = this.add.graphics();
@@ -396,6 +397,23 @@ export class MatchScene extends Phaser.Scene {
     this._pendingResult = { number, zone, results };
   }
 
+  _onPerfectTiming() {
+    this.cameras.main.shake(200, 0.01);
+    const mx = this.timingBar.marker.x;
+    const my = this.timingBar.marker.y;
+    const particles = this.add.particles(mx, my, 'particle-sparkle', {
+      speed: { min: 80, max: 250 },
+      quantity: 12,
+      scale: { start: 1, end: 0 },
+      lifespan: 500,
+      tint: COLOR.GOLD,
+      blendMode: 'ADD',
+      emitting: false,
+    });
+    particles.explode(12);
+    this.time.delayedCall(600, () => particles.destroy());
+  }
+
   _buildReelResults(primaryNumber) {
     const resultReelIndex = getColumnForNumber(primaryNumber);
     const results = [];
@@ -471,6 +489,8 @@ export class MatchScene extends Phaser.Scene {
       this.streakManager.onUsefulHit();
       this.rngManager.recordUsefulHit();
       bus.emit('card:useful-hit', { col: resultReelIndex });
+      // Gold glow on the result reel
+      this.slotMachine.highlightReel(resultReelIndex);
 
       this.spinLog.push({ zone, hit: true });
 
@@ -493,12 +513,26 @@ export class MatchScene extends Phaser.Scene {
           this.bingoCard.setOverlay(nearHit.col, nearHit.row, null);
         });
         bus.emit('card:near-hit', { number });
+        // Near-miss shake + red tint on the close cell
+        const nc = this.bingoCard.getCell(nearHit.col, nearHit.row);
+        if (nc && nc.container) {
+          const origX = nc.container.x;
+          this.tweens.add({ targets: nc.container, x: origX + 4, duration: 50, yoyo: true, repeat: 3 });
+          nc.label.setTint(0xFF4444);
+          this.time.delayedCall(400, () => { if (nc.label) nc.label.clearTint(); });
+        }
         this.spinLog.push({ zone, hit: false, nearHit: true });
       } else {
         this.streakManager.onFullMiss();
         this.rngManager.recordMiss();
         this.meterManager.onFullMiss(this.rngManager.pityCounter);
         bus.emit('card:full-miss', { number });
+        // Brief slot dim + micro-shake on full miss
+        this.cameras.main.shake(100, 0.005);
+        const frame = this.slotMachine.frame;
+        if (frame) {
+          this.tweens.add({ targets: frame, alpha: 0.5, duration: 80, yoyo: true });
+        }
         this.spinLog.push({ zone, hit: false, nearHit: false });
       }
     }
@@ -680,11 +714,28 @@ export class MatchScene extends Phaser.Scene {
 
   _onStreakMilestone(level) {
     const L = this.L;
-    const txt = this.add.text(L.cx, L.H / 2 - 100,
+    const txtX = L.cx;
+    const txtY = L.H / 2 - 100;
+    const txt = this.add.text(txtX, txtY,
       `STREAK ×${level}!`, {
         ...FONT.UI, fontSize: `${Math.round(48 * L.sf)}px`, color: '#FFD700',
         stroke: '#8B6914', strokeThickness: 4,
       }).setOrigin(0.5).setDepth(30);
+
+    // Firework burst from text position
+    const particles = this.add.particles(txtX, txtY, 'particle-spark', {
+      speed: { min: 150, max: 400 },
+      angle: { min: 220, max: 320 },
+      quantity: 20,
+      scale: { start: 1.2, end: 0 },
+      lifespan: 800,
+      gravity: 200,
+      tint: [0xFFD700, 0xFF8C00, 0xFF4500],
+      blendMode: 'ADD',
+      emitting: false,
+    });
+    particles.explode(20);
+    this.time.delayedCall(900, () => particles.destroy());
 
     this.tweens.add({
       targets: txt,

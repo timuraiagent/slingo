@@ -234,10 +234,16 @@ export class SlotMachine {
             this.scene.tweens.add({
               targets: reel.strip,
               y: targetY,
-              duration: 100,
-              ease: 'Sine.easeOut',
+              duration: 120,
+              ease: 'Bounce.easeOut',
               onComplete: () => {
                 reel.flash.setAlpha(0.5);
+                // Result symbol wobble
+                const resultSym = reel.symbols[13];
+                if (resultSym) {
+                  resultSym.setAngle(-2);
+                  this.scene.tweens.add({ targets: resultSym, angle: 0, duration: 150, ease: 'Back.easeOut' });
+                }
                 this.scene.tweens.add({
                   targets: reel.flash,
                   alpha: 0,
@@ -256,6 +262,20 @@ export class SlotMachine {
           },
         });
       });
+    }
+  }
+
+  highlightReel(index) {
+    const reel = this.reels[index];
+    if (!reel) return;
+    reel.flash.clear();
+    reel.flash.fillStyle(0xFFD700, 1);
+    reel.flash.fillRect(0, 0, this.REEL_W, this.SYMBOL_H);
+    reel.flash.setAlpha(0.6);
+    this.scene.tweens.add({ targets: reel.flash, alpha: 0, duration: 300, ease: 'Sine.easeOut' });
+    const midSymbol = reel.symbols[13];
+    if (midSymbol) {
+      this.scene.tweens.add({ targets: midSymbol, scaleX: 1.1, scaleY: 1.1, duration: 75, yoyo: true, ease: 'Sine.easeOut' });
     }
   }
 

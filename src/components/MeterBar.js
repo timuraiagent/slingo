@@ -59,8 +59,14 @@ export class MeterBar {
 
   _onJackpotUpdated(value) {
     const filledCount = Math.floor(value / 20);
+    const newlyFilled = filledCount > this._lastFilledCount ? filledCount - 1 : -1;
+    this._lastFilledCount = filledCount;
     this.segments.forEach((gfx, i) => {
       this._drawSegment(gfx, i < filledCount);
+      // Glow pulse on newly filled segment
+      if (i === newlyFilled) {
+        this.scene.tweens.add({ targets: gfx, alpha: 0.6, duration: 150, yoyo: true });
+      }
     });
   }
 
