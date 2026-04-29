@@ -63,8 +63,9 @@ export class ControlZone {
       if (this.onSpeedToggle) this.onSpeedToggle(this.fastMode);
     });
 
-    // Wild ball indicator
-    this.wildBadge = scene.add.text(jackpotX + Math.round(100 * sf), btnY - Math.round(60 * sf), '🌟', {
+    // Wild ball indicator — between JACKPOT and SPIN buttons
+    const wildX = (jackpotX + spinX) / 2;
+    this.wildBadge = scene.add.text(wildX, btnY - Math.round(50 * sf), '🌟', {
       fontSize: `${Math.round(40 * sf)}px`,
     }).setOrigin(0.5).setAlpha(0).setDepth(6).setInteractive({ useHandCursor: true });
 

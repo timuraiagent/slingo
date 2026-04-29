@@ -30,6 +30,7 @@ export class TimingBar {
     this.baseDuration = 3000;
     this._elapsed = 0;
     this._fastMode = false;
+    this._direction = 1; // 1 = forward (left→right), -1 = backward (right→left)
 
     const BAR_W = Math.round(Math.min(L.W - 60, 960 * L.sf));
     const BAR_H = L.TIMING_HEIGHT;
@@ -74,8 +75,19 @@ export class TimingBar {
     this.active = true;
     this.locked = false;
     this._fastMode = fastMode;
-    this._elapsed = 0;
-    this.marker.setPosition(this.barX, this.barY + this.BAR_H / 2);
+
+    const currentPosition = Phaser.Math.Clamp(
+      (this.marker.x - this.barX) / this.BAR_W, 0, 1
+    );
+    const duration = fastMode ? this.baseDuration / 2 : this.baseDuration;
+
+    // Calculate _elapsed so the marker continues from its current position
+    // in the same direction it was going
+    if (this._direction === 1) {
+      this._elapsed = currentPosition * duration;
+    } else {
+      this._elapsed = duration + (1 - currentPosition) * duration;
+    }
   }
 
   lock() {
@@ -109,26 +121,39 @@ export class TimingBar {
   reset() {
     this.active = false;
     this.locked = false;
-    this._elapsed = 0;
-    this.marker.setPosition(this.barX, this.barY + this.BAR_H / 2);
   }
 
   setSpeed(fastMode) {
     this._fastMode = fastMode;
+    // Recalculate _elapsed so position is preserved with new speed
+    if (this.active && !this.locked) {
+      const currentPosition = Phaser.Math.Clamp(
+        (this.marker.x - this.barX) / this.BAR_W, 0, 1
+      );
+      const duration = fastMode ? this.baseDuration / 2 : this.baseDuration;
+      if (this._direction === 1) {
+        this._elapsed = currentPosition * duration;
+      } else {
+        this._elapsed = duration + (1 - currentPosition) * duration;
+      }
+    }
   }
 
   update(delta) {
     if (!this.active || this.locked) return;
 
-    this._elapsed += delta;
+    // Cap delta to prevent large jumps (e.g., after loading)
+    this._elapsed += Math.min(delta, 100);
     const duration = this._fastMode ? this.baseDuration / 2 : this.baseDuration;
     const cycleTime = this._elapsed % (duration * 2);
 
     let position;
     if (cycleTime < duration) {
       position = cycleTime / duration;
+      this._direction = 1;
     } else {
       position = 1 - (cycleTime - duration) / duration;
+      this._direction = -1;
     }
 
     this.marker.setPosition(
