@@ -24,8 +24,8 @@ export class SlotMachine {
     const PADDING = Math.floor(Math.min(40 * L.sf, (L.W - REEL_COUNT * REEL_W - (REEL_COUNT - 1) * REEL_GAP) / 2));
     const SLOT_W = REEL_COUNT * REEL_W + (REEL_COUNT - 1) * REEL_GAP + PADDING * 2;
     const SLOT_H = REEL_H;
-    const CLIP_TOP = 10;
-    const CLIP_BOT = 10;
+    const CLIP_TOP = 0;
+    const CLIP_BOT = 0;
 
     this.SYMBOL_W = SYMBOL_W;
     this.SYMBOL_H = SYMBOL_H;
@@ -217,7 +217,7 @@ export class SlotMachine {
       }
 
       // Reset strip position
-      const startY = this.slotY + 10;
+      const startY = this.slotY;
       reel.strip.y = startY;
 
       // Target y so resultIndex lands at the middle row
