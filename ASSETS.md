@@ -1,4 +1,4 @@
-# Skill Bingo Slots — Asset Specification
+# Skill Bingo Slots — Asset Specification 
 
 > **Scope**: MVP assets only. Post-MVP expansions noted where relevant.  
 > **Base resolution**: 1080 × 1920 px (portrait). All dimensions given at 1× (base resolution).  
