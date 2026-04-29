@@ -50,7 +50,7 @@ export class BingoCard {
         this.x + i * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
         this.y - 30,
         letter,
-        { fontFamily: 'Nunito', fontSize: '28px', fontStyle: 'bold', color: COLORS[i] }
+        { fontFamily: 'Nunito', fontSize: '36px', fontStyle: 'bold', color: COLORS[i] }
       ).setOrigin(0.5);
     });
 
@@ -74,7 +74,7 @@ export class BingoCard {
     const label = this.scene.add.text(
       CELL_SIZE / 2, CELL_SIZE / 2,
       isFree ? '★\nFREE' : String(number),
-      { ...FONT.NUMBER, fontSize: isFree ? '22px' : '28px', color: '#F0F0FF', align: 'center' }
+      { ...FONT.NUMBER, fontSize: isFree ? '28px' : '36px', color: '#F0F0FF', align: 'center' }
     ).setOrigin(0.5);
 
     const overlay = this.scene.add.graphics();

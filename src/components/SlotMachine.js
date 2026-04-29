@@ -52,6 +52,7 @@ export class SlotMachine {
       const maskShape = this.scene.add.graphics();
       maskShape.fillStyle(0xffffff, 1);
       maskShape.fillRect(this.x + 20 + i * REEL_W, this.y + 20, REEL_W, REEL_H);
+      maskShape.setVisible(false);
       const mask = maskShape.createGeometryMask();
       this.masks.push(maskShape);
 
