@@ -9,6 +9,8 @@ export class ControlZone {
     this.L = L;
     this.fastMode = false;
     this.hasWildBall = false;
+    this._spinTween = null;
+    this._jackpotTween = null;
 
     const sf = L.sf;
     const ch = L.CONTROL_HEIGHT;
@@ -24,11 +26,12 @@ export class ControlZone {
       .setDisplaySize(spinW, spinH)
       .setInteractive({ useHandCursor: true })
       .setDepth(5);
+    this._spinBaseScaleX = this.spinBtn.scaleX;
+    this._spinBaseScaleY = this.spinBtn.scaleY;
 
     this.spinBtn.on('pointerdown', () => {
       this.spinBtn.setTexture('btn-spin-pressed');
-      if (this._spinTween) { this._spinTween.stop(); this._spinTween = null; }
-      this.spinBtn.setScale(1);
+      this._stopSpinTween();
       if (this.onSpin) this.onSpin();
     });
     this.spinBtn.on('pointerup', () => {
@@ -46,6 +49,8 @@ export class ControlZone {
       .setInteractive({ useHandCursor: true })
       .setAlpha(0.4)
       .setDepth(5);
+    this._jackpotBaseScaleX = this.jackpotBtn.scaleX;
+    this._jackpotBaseScaleY = this.jackpotBtn.scaleY;
 
     this.jackpotBtn.on('pointerdown', () => {
       if (this.onJackpot) this.onJackpot();
@@ -76,23 +81,33 @@ export class ControlZone {
     });
   }
 
-  setSpinEnabled(enabled) {
-    this.spinBtn.setTexture('btn-spin-normal');
-    this.spinBtn.setAlpha(enabled ? 1 : 0.4);
-
-    // Stop existing pulse tween if any
+  _stopSpinTween() {
     if (this._spinTween) {
       this._spinTween.stop();
       this._spinTween = null;
-      this.spinBtn.setScale(1);
     }
+    this.spinBtn.setScale(this._spinBaseScaleX, this._spinBaseScaleY);
+  }
+
+  _stopJackpotTween() {
+    if (this._jackpotTween) {
+      this._jackpotTween.stop();
+      this._jackpotTween = null;
+    }
+    this.jackpotBtn.setScale(this._jackpotBaseScaleX, this._jackpotBaseScaleY);
+  }
+
+  setSpinEnabled(enabled) {
+    this.spinBtn.setTexture('btn-spin-normal');
+    this.spinBtn.setAlpha(enabled ? 1 : 0.4);
+    this._stopSpinTween();
 
     if (enabled) {
       this.spinBtn.setInteractive();
       this._spinTween = this.scene.tweens.add({
         targets: this.spinBtn,
-        scaleX: 1.03,
-        scaleY: 1.03,
+        scaleX: this._spinBaseScaleX * 1.03,
+        scaleY: this._spinBaseScaleY * 1.03,
         duration: 700,
         yoyo: true,
         repeat: -1,
@@ -100,26 +115,20 @@ export class ControlZone {
       });
     } else {
       this.spinBtn.disableInteractive();
-      this.spinBtn.setScale(1);
     }
   }
 
   setJackpotHasBall(hasBall) {
     this.jackpotBtn.setTexture(hasBall ? 'btn-jackpot-charged' : 'btn-jackpot-empty');
     this.jackpotBtn.setAlpha(hasBall ? 1 : 0.4);
-
-    // Stop existing throbbing tween if any
-    if (this._jackpotTween) {
-      this._jackpotTween.stop();
-      this._jackpotTween = null;
-    }
+    this._stopJackpotTween();
 
     if (hasBall) {
       this.jackpotBtn.setInteractive();
       this._jackpotTween = this.scene.tweens.add({
         targets: this.jackpotBtn,
-        scaleX: 1.05,
-        scaleY: 1.05,
+        scaleX: this._jackpotBaseScaleX * 1.05,
+        scaleY: this._jackpotBaseScaleY * 1.05,
         duration: 600,
         yoyo: true,
         repeat: -1,
@@ -127,7 +136,6 @@ export class ControlZone {
       });
     } else {
       this.jackpotBtn.disableInteractive();
-      this.jackpotBtn.setScale(1);
     }
   }
 
@@ -142,10 +150,10 @@ export class ControlZone {
   }
 
   disableAll() {
-    if (this._spinTween) { this._spinTween.stop(); this._spinTween = null; }
-    if (this._jackpotTween) { this._jackpotTween.stop(); this._jackpotTween = null; }
-    this.spinBtn.disableInteractive().setAlpha(0.4).setScale(1);
-    this.jackpotBtn.disableInteractive().setAlpha(0.4).setScale(1);
+    this._stopSpinTween();
+    this._stopJackpotTween();
+    this.spinBtn.disableInteractive().setAlpha(0.4);
+    this.jackpotBtn.disableInteractive().setAlpha(0.4);
     this.speedBtn.disableInteractive().setAlpha(0.4);
     this.wildBadge.disableInteractive().setAlpha(0);
   }
