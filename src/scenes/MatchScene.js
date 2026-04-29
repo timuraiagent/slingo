@@ -141,13 +141,16 @@ export class MatchScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Streak badge pill (in HUD, center)
-    const streakPillW = Math.round(260 * sf);
-    const streakPillX = L.cx - streakPillW / 2;
+    this._streakPillW = Math.round(260 * sf);
+    this._streakPillH = pillH;
+    this._streakPillR = pillR;
+    this._streakPillY = hudY;
+    const streakPillX = L.cx - this._streakPillW / 2;
     this.streakPill = this.add.graphics();
     this.streakPill.fillStyle(COLOR.BG_MID, 1);
     this.streakPill.lineStyle(1.5, COLOR.BORDER, 1);
-    this.streakPill.fillRoundedRect(streakPillX, hudY, streakPillW, pillH, pillR);
-    this.streakPill.strokeRoundedRect(streakPillX, hudY, streakPillW, pillH, pillR);
+    this.streakPill.fillRoundedRect(streakPillX, hudY, this._streakPillW, pillH, pillR);
+    this.streakPill.strokeRoundedRect(streakPillX, hudY, this._streakPillW, pillH, pillR);
 
     this.streakHudText = this.add.text(L.cx, hudY + pillH / 2, '🔥 ×0', {
       ...FONT.UI, fontSize: `${hudFontSize}px`, color: '#FFFFFF',
@@ -580,10 +583,12 @@ export class MatchScene extends Phaser.Scene {
     if (!this.streakHudText || !this.streakHudText.active) return;
     this.streakHudText.setText(`🔥 ×${count}`);
 
-    const pillH = Math.round(72 * L.sf);
-    const streakPillW = Math.round(260 * L.sf);
-    const streakPillX = L.cx - streakPillW / 2;
+    // Resize pill to fit text
+    const textW = this.streakHudText.width;
+    const pillW = Math.max(Math.round(260 * L.sf), textW + Math.round(40 * L.sf));
+    const pillX = L.cx - pillW / 2;
     const hudY = L.SAFE_TOP + Math.round(12 * L.sf);
+    const pillH = Math.round(96 * L.sf);
 
     if (this.streakPill && this.streakPill.active) {
       this.streakPill.clear();
@@ -594,8 +599,8 @@ export class MatchScene extends Phaser.Scene {
         this.streakPill.fillStyle(COLOR.BG_MID, 1);
         this.streakPill.lineStyle(1.5, COLOR.BORDER, 1);
       }
-      this.streakPill.fillRoundedRect(streakPillX, hudY, streakPillW, pillH, pillH / 2);
-      this.streakPill.strokeRoundedRect(streakPillX, hudY, streakPillW, pillH, pillH / 2);
+      this.streakPill.fillRoundedRect(pillX, hudY, pillW, pillH, pillH / 2);
+      this.streakPill.strokeRoundedRect(pillX, hudY, pillW, pillH, pillH / 2);
     }
   }
 

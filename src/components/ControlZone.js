@@ -71,7 +71,9 @@ export class ControlZone {
     });
 
     // Wild ball indicator — golden rectangle between SPIN and SPEED buttons
-    const wildX = (spinX + speedX) / 2;
+    const spinRight = spinX + Math.round(140 * sf);
+    const speedLeft = speedX - Math.round(50 * sf);
+    const wildX = (spinRight + speedLeft) / 2;
     const badgeW = Math.round(80 * sf);
     const badgeH = Math.round(80 * sf);
     this.wildBg = scene.add.graphics().setDepth(5);
@@ -115,9 +117,9 @@ export class ControlZone {
       this.spinBtn.setInteractive();
       this._spinTween = this.scene.tweens.add({
         targets: this.spinBtn,
-        scaleX: this._spinBaseScaleX * 1.03,
-        scaleY: this._spinBaseScaleY * 1.03,
-        duration: 700,
+        scaleX: this._spinBaseScaleX * 1.06,
+        scaleY: this._spinBaseScaleY * 1.06,
+        duration: 600,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut',
