@@ -33,7 +33,7 @@ export class TimingBar {
     this._direction = 1; // 1 = forward (left→right), -1 = backward (right→left)
     this._canLock = true;
     this._startZone = null;
-    this._leftStartZone = false;
+    this._reachedEdge = false;
 
     const BAR_W = Math.round(Math.min(L.W - 60, 960 * L.sf));
     const BAR_H = L.TIMING_HEIGHT;
@@ -103,7 +103,9 @@ export class TimingBar {
 
     const startZone = this.timingManager.getZone(currentPosition);
     this._startZone = startZone;
-    this._leftStartZone = false;
+    this._reachedEdge = false;
+    // If starting in MISS zone, lock is allowed immediately;
+    // otherwise marker must reach an edge (position < 0.05 or > 0.95) first
     this._canLock = (startZone === 'MISS');
 
     const duration = fastMode ? this.baseDuration / 2 : this.baseDuration;
@@ -150,7 +152,7 @@ export class TimingBar {
     this.locked = false;
     this._canLock = true;
     this._startZone = null;
-    this._leftStartZone = false;
+    this._reachedEdge = false;
   }
 
   setSpeed(fastMode) {
@@ -191,13 +193,10 @@ export class TimingBar {
       this.barY + this.BAR_H / 2
     );
 
-    // Track whether marker has left the starting zone
-    if (!this._canLock && this._startZone) {
-      const currentZone = this.timingManager.getZone(position);
-      if (currentZone !== this._startZone) {
-        this._leftStartZone = true;
-      }
-      if (this._leftStartZone && currentZone === this._startZone) {
+    // Track whether marker has reached at least one edge of the bar
+    if (!this._canLock && !this._reachedEdge) {
+      if (position < 0.05 || position > 0.95) {
+        this._reachedEdge = true;
         this._canLock = true;
       }
     }
