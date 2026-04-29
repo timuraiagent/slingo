@@ -71,14 +71,23 @@ export class SlotMachine {
       this.flashGraphics.push(flash);
 
       this.reels.push({ container, symbols: [], reelIndex: i });
+
+      // Initial placeholder symbols
+      for (let r = -1; r <= 1; r++) {
+        const [min, max] = COLUMN_RANGES[i];
+        const num = Phaser.Math.Between(min, max);
+        const sym = this._makeSymbol({ id: 'number', label: num }, num);
+        sym.y = r * (SYMBOL_H + SYMBOL_GAP);
+        container.add(sym);
+      }
     }
   }
 
   _makeSymbol(symbolDef, label) {
     const container = this.scene.add.container(0, 0);
     const bg = this.scene.add.graphics();
-    bg.fillStyle(COLOR.BG_LIGHT, 1);
-    bg.lineStyle(1.5, COLOR.GOLD_DARK, 0.6);
+    bg.fillStyle(0x252545, 1);
+    bg.lineStyle(2, 0x5A5A8A, 0.9);
     bg.fillRoundedRect(-REEL_W / 2 + 4, -SYMBOL_H / 2, REEL_W - 8, SYMBOL_H, 10);
     bg.strokeRoundedRect(-REEL_W / 2 + 4, -SYMBOL_H / 2, REEL_W - 8, SYMBOL_H, 10);
     container.add(bg);
