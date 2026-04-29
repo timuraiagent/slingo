@@ -21,9 +21,9 @@ export class ResultsScene extends Phaser.Scene {
 
     // Main panel
     const panelW = Math.min(Math.round(900 * sf), W - 40);
-    const panelH = Math.round(1300 * sf);
+    const panelH = Math.round(1500 * sf);
     const panelX = (W - panelW) / 2;
-    const panelY = Math.round(300 * sf);
+    const panelY = Math.round(180 * sf);
     const panel = this.add.graphics();
     drawPanel(panel, panelX, panelY, panelW, panelH, 24);
 
@@ -61,10 +61,10 @@ export class ResultsScene extends Phaser.Scene {
       const row = this.add.container(cx, sy);
       row.setAlpha(0);
 
-      const iconTxt = this.add.text(Math.round(-300 * sf), 0, icon, {
+      const iconTxt = this.add.text(Math.round(-320 * sf), 0, icon, {
         fontSize: `${Math.round(64 * sf)}px`,
       }).setOrigin(0, 0.5);
-      const labelTxt = this.add.text(Math.round(-230 * sf), 0, label, {
+      const labelTxt = this.add.text(Math.round(-220 * sf), 0, label, {
         ...FONT.LABEL, fontSize: `${Math.round(48 * sf)}px`, color: '#A0A0C0',
       }).setOrigin(0, 0.5);
       const valueTxt = this.add.text(Math.round(300 * sf), 0, String(value), {
@@ -99,11 +99,11 @@ export class ResultsScene extends Phaser.Scene {
     // Buttons
     const btnW = Math.round(400 * sf);
     const btnH = Math.round(100 * sf);
-    const btnY = panelY + panelH - Math.round(200 * sf);
+    const btnY = panelY + panelH - Math.round(280 * sf);
     const playAgain = makeTextButton(this, cx, btnY, btnW, btnH, 'PLAY AGAIN', {
       fontSize: `${Math.round(48 * sf)}px`,
     });
-    const mainMenu = makeTextButton(this, cx, btnY + Math.round(160 * sf), btnW, btnH, 'MAIN MENU', {
+    const mainMenu = makeTextButton(this, cx, btnY + Math.round(140 * sf), btnW, btnH, 'MAIN MENU', {
       fontSize: `${Math.round(48 * sf)}px`,
     });
 
