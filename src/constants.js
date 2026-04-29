@@ -8,7 +8,7 @@ export const CARD_SIZE = 5;
 export const CELL_SIZE = 152;
 export const CELL_GAP = 14;
 export const CONTROL_HEIGHT = 220;
-export const SLOT_HEIGHT = 420;
+export const SLOT_HEIGHT = 380;
 export const TIMING_HEIGHT = 140;
 export const METER_HEIGHT = 80;
 

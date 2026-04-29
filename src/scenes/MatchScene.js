@@ -14,7 +14,7 @@ import { PressureManager } from '../managers/PressureManager.js';
 import { AudioManager } from '../managers/AudioManager.js';
 import { MatchStateMachine, STATE } from '../managers/MatchStateMachine.js';
 import { BingoCard } from '../components/BingoCard.js';
-import { SlotMachine } from '../components/SlotMachine.js';
+import { SlotMachine, SLOT_W } from '../components/SlotMachine.js';
 import { TimingBar } from '../components/TimingBar.js';
 import { MeterBar } from '../components/MeterBar.js';
 import { ControlZone } from '../components/ControlZone.js';
@@ -94,7 +94,7 @@ export class MatchScene extends Phaser.Scene {
     this.bingoCard = new BingoCard(this, cardX, cardY, this.cardManager);
     this.meterBar = new MeterBar(this, cardX, meterY);
     this.timingBar = new TimingBar(this, (W - 960) / 2, timingY + 20);
-    this.slotMachine = new SlotMachine(this, (W - (5 * 168 + 40)) / 2, slotY);
+    this.slotMachine = new SlotMachine(this, (W - SLOT_W) / 2, slotY);
     this.controlZone = new ControlZone(this, W / 2, controlY + 60,
       () => this._onSpinTap(),
       () => this._onJackpotTap(),
