@@ -403,19 +403,24 @@ export class MatchScene extends Phaser.Scene {
 
     const { number, zone, results } = this._pendingResult;
 
-    // Close ALL matching numbers from the center row, not just the primary
+    // Only the result reel's number closes a cell (MVP §3.4).
+    // Non-result reel numbers are display-only (MVP §3.6).
+    // Special symbols on non-result reels apply side effects only.
     let hitAny = false;
     const resultReelIndex = getColumnForNumber(number);
 
+    // Close the primary result number
+    const closeResult = this.cardManager.closeNumber(number);
+    if (closeResult) {
+      hitAny = true;
+      this.bingoCard.closeCell(closeResult.col, closeResult.row, false);
+    }
+
+    // Process side-effect symbols on non-result reels
     for (let i = 0; i < results.length; i++) {
+      if (i === resultReelIndex) continue;
       const sym = results[i];
-      if (sym.id === 'number') {
-        const closeResult = this.cardManager.closeNumber(sym.label);
-        if (closeResult) {
-          hitAny = true;
-          this.bingoCard.closeCell(closeResult.col, closeResult.row, false);
-        }
-      } else if (sym.id === 'jackpot') {
+      if (sym.id === 'jackpot') {
         this.meterManager.onJackpotSymbol();
       } else if (sym.id === 'wild') {
         if (!this.hasWildBall) {
