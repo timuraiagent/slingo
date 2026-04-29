@@ -61,6 +61,7 @@ export class MatchScene extends Phaser.Scene {
     // Components
     this.bingoCard = new BingoCard(this, L.cardX, L.cardY, this.cardManager, L);
     this.meterBar = new MeterBar(this, L.cardX, L.meterY, L);
+    this.bingoCard.revealAnimation();
     this.timingBar = new TimingBar(this, L.cx, L.timingY, L);
     this.slotMachine = new SlotMachine(this, L.cx, L.slotY, this.rngManager.getRng(), L);
     this.controlZone = new ControlZone(this, 0, L.controlY, W, L);
@@ -986,6 +987,36 @@ export class MatchScene extends Phaser.Scene {
 
   _selectWildColumn(colIndex) {
     if (!this.wildSelecting) return;
+
+    const L = this.L;
+
+    // Flash the selected column
+    const colFlash = this.add.graphics().setDepth(22);
+    const colX = L.cardX + colIndex * (L.CELL_SIZE + L.CELL_GAP);
+    colFlash.fillStyle(COLOR.GOLD, 0.5);
+    colFlash.fillRoundedRect(colX - 6, L.cardY - 50, L.CELL_SIZE + 12, L.CARD_W + 100, 12);
+    this.tweens.add({
+      targets: colFlash,
+      alpha: 0,
+      duration: 600,
+      ease: 'Sine.easeOut',
+      onComplete: () => colFlash.destroy(),
+    });
+
+    // Pulse each cell in that column
+    for (let r = 0; r < 5; r++) {
+      const cell = this.bingoCard.getCell(colIndex, r);
+      if (cell && cell.container) {
+        this.tweens.add({
+          targets: cell.container,
+          scaleX: 1.15,
+          scaleY: 1.15,
+          duration: 100,
+          yoyo: true,
+          ease: 'Back.easeOut',
+        });
+      }
+    }
 
     const ranges = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
     const [lo, hi] = ranges[colIndex];

@@ -50,6 +50,13 @@ export class BingoCard {
       }
     }
 
+    // Start hidden for curtain reveal
+    this.cells.forEach(cell => {
+      cell.container.setAlpha(0).setScale(0.8, 0.8);
+    });
+    this.headerTexts.forEach(t => t.setAlpha(0));
+    this.panel.setAlpha(0);
+
     // Debug tap handler
     if (DEBUG_FLAGS.cellTap) {
       this.cells.forEach((cell) => {
@@ -236,6 +243,47 @@ export class BingoCard {
       duration: 600,
       onComplete: () => gfx.destroy(),
     });
+  }
+
+  revealAnimation(onComplete) {
+    // Panel + headers fade in
+    this.scene.tweens.add({
+      targets: this.panel,
+      alpha: 1,
+      duration: 300,
+    });
+    this.headerTexts.forEach((t, i) => {
+      this.scene.tweens.add({
+        targets: t,
+        alpha: 1,
+        delay: i * 60,
+        duration: 200,
+      });
+    });
+
+    // Cells appear column-by-column, top-to-bottom
+    let maxDelay = 0;
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const cell = this.getCell(c, r);
+        if (!cell) continue;
+        const delay = c * 120 + r * 80;
+        if (delay > maxDelay) maxDelay = delay;
+        this.scene.tweens.add({
+          targets: cell.container,
+          alpha: 1,
+          scaleX: 1,
+          scaleY: 1,
+          delay,
+          duration: 150,
+          ease: 'Back.easeOut',
+        });
+      }
+    }
+
+    if (onComplete) {
+      this.scene.time.delayedCall(maxDelay + 250, onComplete);
+    }
   }
 
   destroy() {

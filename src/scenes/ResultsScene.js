@@ -26,25 +26,51 @@ export class ResultsScene extends Phaser.Scene {
     const panelY = Math.round(180 * sf);
     const panel = this.add.graphics();
     drawPanel(panel, panelX, panelY, panelW, panelH, 24);
+    panel.setAlpha(0);
+    this.tweens.add({
+      targets: panel,
+      alpha: 1,
+      duration: 400,
+      ease: 'Sine.easeOut',
+    });
 
     // "YOU PLACED"
-    this.add.text(cx, panelY + Math.round(60 * sf), 'YOU PLACED', {
+    const youPlaced = this.add.text(cx, panelY + Math.round(60 * sf), 'YOU PLACED', {
       ...FONT.UI, fontSize: `${Math.round(54 * sf)}px`, color: '#F0F0FF',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setAlpha(0);
+    this.tweens.add({
+      targets: youPlaced,
+      alpha: 1,
+      duration: 300,
+      delay: 200,
+    });
 
     // Position display
     const trophyMap = { 1: '🥇', 2: '🥈', 3: '🥉' };
     const trophy = trophyMap[data_.position] || '';
     if (trophy) {
-      this.add.text(cx, panelY + Math.round(160 * sf), trophy, {
+      const trophyText = this.add.text(cx, panelY + Math.round(160 * sf), trophy, {
         fontSize: `${Math.round(144 * sf)}px`,
-      }).setOrigin(0.5);
+      }).setOrigin(0.5).setScale(0).setAlpha(0);
+      this.tweens.add({
+        targets: trophyText,
+        scaleX: 1, scaleY: 1, alpha: 1,
+        duration: 500,
+        delay: 400,
+        ease: 'Back.easeOut',
+      });
     }
 
     const ord = this._ordinal(data_.position);
-    this.add.text(cx, panelY + Math.round(260 * sf), `${ord} / ${data_.totalPlayers}`, {
+    const posText = this.add.text(cx, panelY + Math.round(260 * sf), `${ord} / ${data_.totalPlayers}`, {
       ...FONT.UI, fontSize: `${Math.round(72 * sf)}px`, color: '#F0F0FF',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setAlpha(0);
+    this.tweens.add({
+      targets: posText,
+      alpha: 1,
+      duration: 300,
+      delay: 600,
+    });
 
     // Stat rows
     const statStartY = panelY + Math.round(360 * sf);
@@ -76,16 +102,19 @@ export class ResultsScene extends Phaser.Scene {
       this.tweens.add({
         targets: row,
         alpha: 1,
-        duration: 200,
-        delay: i * 100,
+        x: cx,
+        duration: 300,
+        delay: 700 + i * 120,
+        ease: 'Back.easeOut',
       });
+      row.setX(cx + 60);
 
       if (i === 0 && typeof value === 'number') {
         const counter = this.tweens.addCounter({
           from: 0,
           to: value,
           duration: 800,
-          delay: i * 100 + 200,
+          delay: 700 + i * 120 + 300,
           onUpdate: (tween) => {
             valueTxt.setText(String(Math.floor(tween.getValue())));
           },
@@ -103,8 +132,23 @@ export class ResultsScene extends Phaser.Scene {
     const playAgain = makeTextButton(this, cx, btnY, btnW, btnH, 'PLAY AGAIN', {
       fontSize: `${Math.round(48 * sf)}px`,
     });
+    playAgain.setAlpha(0);
+    this.tweens.add({
+      targets: playAgain,
+      alpha: 1,
+      duration: 300,
+      delay: 1400,
+    });
+
     const mainMenu = makeTextButton(this, cx, btnY + Math.round(140 * sf), btnW, btnH, 'MAIN MENU', {
       fontSize: `${Math.round(48 * sf)}px`,
+    });
+    mainMenu.setAlpha(0);
+    this.tweens.add({
+      targets: mainMenu,
+      alpha: 1,
+      duration: 300,
+      delay: 1500,
     });
 
     playAgain.on('pointerdown', () => {

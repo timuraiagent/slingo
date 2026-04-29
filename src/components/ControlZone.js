@@ -11,6 +11,7 @@ export class ControlZone {
     this.hasWildBall = false;
     this._spinTween = null;
     this._jackpotTween = null;
+    this._wildTween = null;
 
     const sf = L.sf;
     const ch = L.CONTROL_HEIGHT;
@@ -117,9 +118,9 @@ export class ControlZone {
       this.spinBtn.setInteractive();
       this._spinTween = this.scene.tweens.add({
         targets: this.spinBtn,
-        scaleX: this._spinBaseScaleX * 1.06,
-        scaleY: this._spinBaseScaleY * 1.06,
-        duration: 600,
+        scaleX: this._spinBaseScaleX * 1.10,
+        scaleY: this._spinBaseScaleY * 1.10,
+        duration: 500,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut',
@@ -138,9 +139,9 @@ export class ControlZone {
       this.jackpotBtn.setInteractive();
       this._jackpotTween = this.scene.tweens.add({
         targets: this.jackpotBtn,
-        scaleX: this._jackpotBaseScaleX * 1.05,
-        scaleY: this._jackpotBaseScaleY * 1.05,
-        duration: 600,
+        scaleX: this._jackpotBaseScaleX * 1.10,
+        scaleY: this._jackpotBaseScaleY * 1.10,
+        duration: 500,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut',
