@@ -31,6 +31,9 @@ export class TimingBar {
     this._elapsed = 0;
     this._fastMode = false;
     this._direction = 1; // 1 = forward (left→right), -1 = backward (right→left)
+    this._canLock = true;
+    this._startZone = null;
+    this._leftStartZone = false;
 
     const BAR_W = Math.round(Math.min(L.W - 60, 960 * L.sf));
     const BAR_H = L.TIMING_HEIGHT;
@@ -97,6 +100,12 @@ export class TimingBar {
     const currentPosition = Phaser.Math.Clamp(
       (this.marker.x - this.barX) / this.BAR_W, 0, 1
     );
+
+    const startZone = this.timingManager.getZone(currentPosition);
+    this._startZone = startZone;
+    this._leftStartZone = false;
+    this._canLock = (startZone === 'MISS');
+
     const duration = fastMode ? this.baseDuration / 2 : this.baseDuration;
 
     // Calculate _elapsed so the marker continues from its current position
@@ -109,7 +118,7 @@ export class TimingBar {
   }
 
   lock() {
-    if (!this.active || this.locked) return null;
+    if (!this.active || this.locked || !this._canLock) return null;
     this.locked = true;
 
     const position = (this.marker.x - this.barX) / this.BAR_W;
@@ -139,6 +148,9 @@ export class TimingBar {
   reset() {
     this.active = false;
     this.locked = false;
+    this._canLock = true;
+    this._startZone = null;
+    this._leftStartZone = false;
   }
 
   setSpeed(fastMode) {
@@ -178,6 +190,17 @@ export class TimingBar {
       this.barX + position * this.BAR_W,
       this.barY + this.BAR_H / 2
     );
+
+    // Track whether marker has left the starting zone
+    if (!this._canLock && this._startZone) {
+      const currentZone = this.timingManager.getZone(position);
+      if (currentZone !== this._startZone) {
+        this._leftStartZone = true;
+      }
+      if (this._leftStartZone && currentZone === this._startZone) {
+        this._canLock = true;
+      }
+    }
   }
 
   deactivate() {

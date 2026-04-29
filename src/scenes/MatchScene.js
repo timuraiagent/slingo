@@ -329,6 +329,8 @@ export class MatchScene extends Phaser.Scene {
     const timingResult = this.timingBar.lock();
     if (!timingResult) {
       this.stateMachine.setState(STATES.IDLE);
+      // Re-arm auto-fire to retry once marker has traversed enough
+      this._resetAutoFire();
       return;
     }
 
