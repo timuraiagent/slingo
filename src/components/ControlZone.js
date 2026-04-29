@@ -16,8 +16,11 @@ export class ControlZone {
     const jackpotX = x + W * 0.2;
     const speedX = x + W * 0.8;
 
-    // SPIN button
+    // SPIN button — scale image to fit layout
+    const spinW = Math.round(160 * sf);
+    const spinH = Math.round(60 * sf);
     this.spinBtn = scene.add.image(spinX, btnY, 'btn-spin-normal')
+      .setDisplaySize(spinW, spinH)
       .setInteractive({ useHandCursor: true })
       .setDepth(5);
 
@@ -33,7 +36,10 @@ export class ControlZone {
     });
 
     // JACKPOT button
+    const jackpotW = Math.round(110 * sf);
+    const jackpotH = Math.round(50 * sf);
     this.jackpotBtn = scene.add.image(jackpotX, btnY, 'btn-jackpot-empty')
+      .setDisplaySize(jackpotW, jackpotH)
       .setInteractive({ useHandCursor: true })
       .setAlpha(0.4)
       .setDepth(5);
@@ -43,7 +49,10 @@ export class ControlZone {
     });
 
     // Speed toggle
+    const speedW = Math.round(50 * sf);
+    const speedH = Math.round(40 * sf);
     this.speedBtn = scene.add.image(speedX, btnY, 'btn-speed-normal')
+      .setDisplaySize(speedW, speedH)
       .setInteractive({ useHandCursor: true })
       .setDepth(5);
 

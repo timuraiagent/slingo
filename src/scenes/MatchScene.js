@@ -721,12 +721,13 @@ export class MatchScene extends Phaser.Scene {
     });
 
     // BINGO overlay
-    const bingoImg = this.add.image(L.cx, L.H / 2 - 200,
-      'overlay-bingo').setDepth(41).setScale(0.3).setAlpha(0);
+    const bingoScale = L.W / 800;
+    const bingoImg = this.add.image(L.cx, L.H / 2 - Math.round(200 * L.sf),
+      'overlay-bingo').setDepth(41).setScale(bingoScale * 0.3).setAlpha(0);
 
     this.tweens.add({
       targets: bingoImg,
-      scaleX: 1, scaleY: 1, alpha: 1,
+      scaleX: bingoScale, scaleY: bingoScale, alpha: 1,
       duration: 400,
       ease: 'Back.easeOut',
     });

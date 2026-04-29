@@ -107,11 +107,11 @@ export class SlotMachine {
     const container = this.scene.add.container(0, index * SYMBOL_H + SYMBOL_H / 2);
 
     if (symbolDef && symbolDef.id === 'jackpot') {
-      container.add(this.scene.add.image(0, 0, 'sym-jackpot').setScale(0.85));
+      container.add(this.scene.add.image(0, 0, 'sym-jackpot').setDisplaySize(SYMBOL_W - 16, SYMBOL_H - 10));
     } else if (symbolDef && symbolDef.id === 'wild') {
-      container.add(this.scene.add.image(0, 0, 'sym-wild').setScale(0.85));
+      container.add(this.scene.add.image(0, 0, 'sym-wild').setDisplaySize(SYMBOL_W - 16, SYMBOL_H - 10));
     } else if (symbolDef && symbolDef.id === 'multiplier') {
-      container.add(this.scene.add.image(0, 0, 'sym-multiplier').setScale(0.85));
+      container.add(this.scene.add.image(0, 0, 'sym-multiplier').setDisplaySize(SYMBOL_W - 16, SYMBOL_H - 10));
     } else {
       const bg = this.scene.add.graphics();
       bg.fillStyle(COLOR.BG_LIGHT, 1);
