@@ -366,16 +366,27 @@ export class MatchScene extends Phaser.Scene {
   _buildResults(primaryNumber) {
     const resultReelIndex = getColumnForNumber(primaryNumber);
     const results = [];
+    const ranges = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
 
     for (let i = 0; i < 5; i++) {
       if (i === resultReelIndex) {
+        // Primary number goes in its column reel
         results.push({ id: 'number', label: primaryNumber });
       } else {
+        // Other reels: decide symbol type, but if it's a number, pick one
+        // from the player's card in this column (so the center row always
+        // shows numbers that exist on the bingo card)
         const symbolType = this.rngManager.getRng().weightedPick(SYMBOLS);
         if (symbolType.id === 'number') {
-          const ranges = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
           const [lo, hi] = ranges[i];
-          results.push({ id: 'number', label: this.rngManager.getRng().intBetween(lo, hi) });
+          const openInCol = this.cardManager.getOpenNumbers().filter(n => n >= lo && n <= hi);
+          const allInCol = this.cardManager.grid.flat().filter(n => n >= lo && n <= hi);
+          // Prefer open numbers (not yet marked), fall back to any card number in column
+          const pool = openInCol.length > 0 ? openInCol : allInCol;
+          const label = pool.length > 0
+            ? this.rngManager.getRng().pickFrom(pool)
+            : this.rngManager.getRng().intBetween(lo, hi);
+          results.push({ id: 'number', label });
         } else {
           results.push({ id: symbolType.id, label: symbolType.id });
         }
@@ -391,14 +402,20 @@ export class MatchScene extends Phaser.Scene {
     this.spinCount++;
 
     const { number, zone, results } = this._pendingResult;
-    const closeResult = this.cardManager.closeNumber(number);
 
-    // Process side effects from non-result reels
+    // Close ALL matching numbers from the center row, not just the primary
+    let hitAny = false;
     const resultReelIndex = getColumnForNumber(number);
+
     for (let i = 0; i < results.length; i++) {
-      if (i === resultReelIndex) continue;
       const sym = results[i];
-      if (sym.id === 'jackpot') {
+      if (sym.id === 'number') {
+        const closeResult = this.cardManager.closeNumber(sym.label);
+        if (closeResult) {
+          hitAny = true;
+          this.bingoCard.closeCell(closeResult.col, closeResult.row, false);
+        }
+      } else if (sym.id === 'jackpot') {
         this.meterManager.onJackpotSymbol();
       } else if (sym.id === 'wild') {
         if (!this.hasWildBall) {
@@ -410,13 +427,12 @@ export class MatchScene extends Phaser.Scene {
       }
     }
 
-    if (closeResult) {
-      // Useful hit!
-      this.bingoCard.closeCell(closeResult.col, closeResult.row, false);
+    if (hitAny) {
+      // At least one number matched the card
       this.meterManager.onUsefulHit(zone);
       this.streakManager.onUsefulHit();
       this.rngManager.recordUsefulHit();
-      bus.emit('card:useful-hit', closeResult);
+      bus.emit('card:useful-hit', { col: resultReelIndex });
 
       this.spinLog.push({ zone, hit: true });
 
@@ -430,7 +446,7 @@ export class MatchScene extends Phaser.Scene {
         return;
       }
     } else {
-      // Check for near-hit (any zone — near-hits never break streak per §7.1)
+      // No number matched — check near-hit
       const nearHit = this.cardManager.isNearNumber(number, 5);
       if (nearHit) {
         this.meterManager.onNearHit(zone);
@@ -441,7 +457,6 @@ export class MatchScene extends Phaser.Scene {
         bus.emit('card:near-hit', { number });
         this.spinLog.push({ zone, hit: false, nearHit: true });
       } else {
-        // Full miss
         this.streakManager.onFullMiss();
         this.rngManager.recordMiss();
         this.meterManager.onFullMiss(this.rngManager.pityCounter);
