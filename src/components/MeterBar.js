@@ -1,23 +1,29 @@
-import { COLOR, FONT, METER_HEIGHT } from '../constants.js';
+import { COLOR, FONT } from '../constants.js';
 import { bus } from '../utils/eventBus.js';
 
 const SEGMENTS = 5;
-const SEG_W = 140;
-const SEG_H = 36;
-const SEG_GAP = 8;
 
 export class MeterBar {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, L) {
     this.scene = scene;
     this.x = x;
     this.y = y;
+    this.L = L;
     this._handlers = [];
     this.segments = [];
 
-    // JACKPOT label
-    scene.add.text(x, y - 8, 'JACKPOT', {
-      ...FONT.UI, fontSize: '18px', color: '#FFD700',
-    }).setOrigin(0, 1);
+    const CARD_W = L.CARD_W;
+    const SEG_H = Math.round(36 * L.sf);
+    const SEG_W = Math.round((CARD_W - (SEGMENTS - 1) * 8 * L.sf) / SEGMENTS);
+    const SEG_GAP = Math.round(8 * L.sf);
+    this.SEG_W = SEG_W;
+    this.SEG_H = SEG_H;
+    this.SEG_GAP = SEG_GAP;
+
+    // JACKPOT label — gold, centered, larger
+    scene.add.text(x + CARD_W / 2, y - 4, 'JACKPOT', {
+      ...FONT.UI, fontSize: `${Math.round(SEG_H * 0.55)}px`, color: '#FFD700',
+    }).setOrigin(0.5, 1);
 
     // Segments
     for (let i = 0; i < SEGMENTS; i++) {
@@ -27,23 +33,9 @@ export class MeterBar {
       this.segments.push(gfx);
     }
 
-    // Streak badge
-    const badgeX = x + SEGMENTS * (SEG_W + SEG_GAP) + 20;
-    const badgeGfx = scene.add.graphics();
-    badgeGfx.fillStyle(COLOR.BG_LIGHT, 1);
-    badgeGfx.lineStyle(1.5, COLOR.BORDER, 1);
-    badgeGfx.fillRoundedRect(badgeX, y + 4, 160, SEG_H, 18);
-    badgeGfx.strokeRoundedRect(badgeX, y + 4, 160, SEG_H, 18);
-    this.streakBg = badgeGfx;
-
-    this.streakText = scene.add.text(badgeX + 80, y + 4 + SEG_H / 2, '🔥 ×0', {
-      ...FONT.UI, fontSize: '20px', color: '#FFFFFF',
-    }).setOrigin(0.5);
-
-    // Bus listeners
+    // Bus listeners (streak is now in HUD, not here)
     this._on('meter:jackpot:updated', (value) => this._onJackpotUpdated(value));
     this._on('meter:jackpot:earned', () => this._onJackpotEarned());
-    this._on('streak:updated', (count) => this._onStreakUpdated(count));
   }
 
   _on(event, fn, ctx) {
@@ -52,11 +44,19 @@ export class MeterBar {
   }
 
   _drawSegment(gfx, filled) {
+    const SEG_W = this.SEG_W;
+    const SEG_H = this.SEG_H;
     gfx.clear();
     gfx.fillStyle(filled ? COLOR.GOLD : COLOR.GREY, 1);
     gfx.lineStyle(1, filled ? COLOR.GOLD : COLOR.BORDER, 1);
     gfx.fillRoundedRect(0, 0, SEG_W, SEG_H, 8);
     gfx.strokeRoundedRect(0, 0, SEG_W, SEG_H, 8);
+
+    // Inner highlight stroke for empty segments
+    if (!filled) {
+      gfx.lineStyle(1, 0x5A5A7A, 0.3);
+      gfx.strokeRoundedRect(2, 2, SEG_W - 4, SEG_H - 4, 6);
+    }
   }
 
   _onJackpotUpdated(value) {
@@ -67,7 +67,6 @@ export class MeterBar {
   }
 
   _onJackpotEarned() {
-    // Flash all segments 3 times, then reset
     let flashes = 0;
     const flashInterval = this.scene.time.addEvent({
       delay: 150,
@@ -86,28 +85,9 @@ export class MeterBar {
     });
   }
 
-  _onStreakUpdated(count) {
-    this.streakText.setText(`🔥 ×${count}`);
-    // Color at 3+
-    if (count >= 3) {
-      this.streakBg.clear();
-      this.streakBg.fillStyle(COLOR.ORANGE_HOT, 1);
-      this.streakBg.lineStyle(1.5, COLOR.GOLD_DARK, 1);
-      const badgeX = this.x + SEGMENTS * (SEG_W + SEG_GAP) + 20;
-      this.streakBg.fillRoundedRect(badgeX, this.y + 4, 160, SEG_H, 18);
-      this.streakBg.strokeRoundedRect(badgeX, this.y + 4, 160, SEG_H, 18);
-    } else {
-      this.streakBg.clear();
-      this.streakBg.fillStyle(COLOR.BG_LIGHT, 1);
-      this.streakBg.lineStyle(1.5, COLOR.BORDER, 1);
-      const badgeX = this.x + SEGMENTS * (SEG_W + SEG_GAP) + 20;
-      this.streakBg.fillRoundedRect(badgeX, this.y + 4, 160, SEG_H, 18);
-      this.streakBg.strokeRoundedRect(badgeX, this.y + 4, 160, SEG_H, 18);
-    }
-  }
-
   destroy() {
     this._handlers.forEach(([e, fn, ctx]) => bus.off(e, fn, ctx));
     this._handlers = [];
+    this.segments = [];
   }
 }

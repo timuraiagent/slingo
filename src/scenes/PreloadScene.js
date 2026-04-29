@@ -5,19 +5,28 @@ export class PreloadScene extends Phaser.Scene {
   constructor() { super('PreloadScene'); }
 
   preload() {
+    const W = this.scale.width;
+    const H = this.scale.height;
+    const sf = Math.min(W / 1080, H / 2340);
+
+    const barW = Math.round(600 * sf);
+    const barH = Math.round(24 * sf);
+    const barX = (W - barW) / 2;
+    const barY = H * 0.4;
+
     const barBg = this.add.graphics();
     barBg.fillStyle(0x1E1E3A, 1);
     barBg.lineStyle(1, 0x3A3A60, 1);
-    barBg.fillRoundedRect(240, 940, 600, 24, 12);
+    barBg.fillRoundedRect(barX, barY, barW, barH, 12);
 
     const barFill = this.add.graphics();
     this.load.on('progress', (v) => {
       barFill.clear();
       barFill.fillStyle(0xFFD700, 1);
-      barFill.fillRoundedRect(240, 940, 600 * v, 24, 12);
+      barFill.fillRoundedRect(barX, barY, barW * v, barH, 12);
     });
 
-    // Images — adapted to actual asset filenames (G01–G13, flat directory)
+    // Images
     this.load.image('logo',                'G01.png');
     this.load.image('btn-spin-normal',     'G02-normal.png');
     this.load.image('btn-spin-pressed',    'G02-pressed.png');
@@ -35,7 +44,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('reel-result-row',     'G12.png');
     this.load.image('popup-jackpot',       'G13.png');
 
-    // Audio — 10 SFX pairs (mp3 + ogg)
+    // Audio
     const audioKeys = [
       'reel-spin', 'reel-stop', 'useful-hit', 'near-hit',
       'jackpot-segment', 'jackpot-earned', 'perfect-timing',

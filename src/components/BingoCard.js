@@ -1,33 +1,40 @@
-import { COLOR, FONT, CELL_SIZE, CELL_GAP, CARD_SIZE, DEBUG_FLAGS } from '../constants.js';
+import { COLOR, FONT, DEBUG_FLAGS } from '../constants.js';
 import { drawPanel } from '../utils/draw.js';
 import { bus } from '../utils/eventBus.js';
 
-const CARD_W = CARD_SIZE * CELL_SIZE + (CARD_SIZE - 1) * CELL_GAP;
+const CARD_SIZE = 5;
 const HEADER_COLORS = ['#3498DB', '#9B59B6', '#2ECC71', '#FF8C00', '#E74C3C'];
 const HEADERS = ['B', 'I', 'N', 'G', 'O'];
-const HALF = CELL_SIZE / 2;
 
 export class BingoCard {
-  constructor(scene, x, y, cardManager) {
+  constructor(scene, x, y, cardManager, L) {
     this.scene = scene;
     this.x = x;
     this.y = y;
     this.cardManager = cardManager;
+    this.L = L;
     this.cells = [];
     this.overlayTweens = [];
     this._handlers = [];
 
-    // Card panel
+    const CELL_SIZE = L.CELL_SIZE;
+    const CELL_GAP = L.CELL_GAP;
+    const HALF = CELL_SIZE / 2;
+    this.HALF = HALF;
+
+    const CARD_W = L.CARD_W;
+
+    // Card panel with border
     this.panel = scene.add.graphics();
-    drawPanel(this.panel, x - 10, y - 40, CARD_W + 20, CARD_W + 50, 20, COLOR.BG_MID, COLOR.BORDER);
+    drawPanel(this.panel, x - 16, y - 50, CARD_W + 32, CARD_W + 70, 20, COLOR.BG_MID, COLOR.BORDER);
 
     // Column headers
     this.headerTexts = [];
     for (let c = 0; c < 5; c++) {
       const hx = x + c * (CELL_SIZE + CELL_GAP) + HALF;
       this.headerTexts.push(
-        scene.add.text(hx, y - 20, HEADERS[c], {
-          ...FONT.UI, fontSize: '32px', color: HEADER_COLORS[c],
+        scene.add.text(hx, y - 18, HEADERS[c], {
+          ...FONT.UI, fontSize: `${Math.round(CELL_SIZE * 0.35)}px`, color: HEADER_COLORS[c],
         }).setOrigin(0.5)
       );
     }
@@ -58,7 +65,10 @@ export class BingoCard {
   }
 
   _makeCell(col, row, number) {
-    // Container positioned at cell center — children offset by -HALF
+    const CELL_SIZE = this.L.CELL_SIZE;
+    const CELL_GAP = this.L.CELL_GAP;
+    const HALF = this.HALF;
+
     const cx = this.x + col * (CELL_SIZE + CELL_GAP) + HALF;
     const cy = this.y + row * (CELL_SIZE + CELL_GAP) + 20 + HALF;
 
@@ -72,7 +82,8 @@ export class BingoCard {
     const label = this.scene.add.text(0, 0,
       number === 0 ? '★\nFREE' : String(number),
       {
-        ...FONT.NUMBER, fontSize: number === 0 ? '28px' : '36px',
+        ...FONT.NUMBER,
+        fontSize: number === 0 ? `${Math.round(CELL_SIZE * 0.25)}px` : `${Math.round(CELL_SIZE * 0.35)}px`,
         color: number === 0 ? '#FFD700' : '#F0F0FF',
         align: 'center',
       }
@@ -88,6 +99,8 @@ export class BingoCard {
   }
 
   _drawOpen(bg) {
+    const HALF = this.HALF;
+    const CELL_SIZE = this.L.CELL_SIZE;
     bg.clear();
     bg.fillStyle(COLOR.BG_LIGHT, 1);
     bg.lineStyle(1.5, COLOR.BORDER, 1);
@@ -96,6 +109,8 @@ export class BingoCard {
   }
 
   _drawClosed(bg) {
+    const HALF = this.HALF;
+    const CELL_SIZE = this.L.CELL_SIZE;
     bg.clear();
     bg.fillStyle(COLOR.GREEN_HIT, 1);
     bg.lineStyle(1.5, COLOR.GREEN_DARK, 1);
@@ -104,6 +119,8 @@ export class BingoCard {
   }
 
   _drawFree(bg) {
+    const HALF = this.HALF;
+    const CELL_SIZE = this.L.CELL_SIZE;
     bg.clear();
     bg.fillStyle(COLOR.GREEN_HIT, 1);
     bg.lineStyle(1.5, COLOR.GREEN_DARK, 1);
@@ -123,7 +140,6 @@ export class BingoCard {
     this._drawClosed(cell.bg);
     cell.label.setColor('#FFFFFF');
 
-    // Scale tween from center (container is at center position)
     this.scene.tweens.add({
       targets: cell.container,
       scaleX: 1.2, scaleY: 1.2,
@@ -132,7 +148,6 @@ export class BingoCard {
       ease: 'Back.easeOut',
     });
 
-    // Particle burst at container center
     const px = cell.container.x;
     const py = cell.container.y;
     const tint = isJackpot ? COLOR.GOLD : COLOR.GREEN_HIT;
@@ -173,6 +188,8 @@ export class BingoCard {
       return;
     }
 
+    const HALF = this.HALF;
+    const CELL_SIZE = this.L.CELL_SIZE;
     cell.overlay.lineStyle(lineW, color, 1);
     cell.overlay.strokeRoundedRect(-HALF + 4, -HALF + 4, CELL_SIZE - 8, CELL_SIZE - 8, 10);
     cell.overlay.setAlpha(0.4);

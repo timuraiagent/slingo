@@ -2,10 +2,8 @@ import Phaser from 'phaser';
 import { drawBackground, makeTextButton } from '../utils/draw.js';
 import {
   COLOR, FONT, BASE_W, BASE_H,
-  SAFE_TOP, SAFE_BOTTOM, HUD_HEIGHT,
-  CELL_SIZE, CELL_GAP, CARD_SIZE,
-  CONTROL_HEIGHT, SLOT_HEIGHT, TIMING_HEIGHT, METER_HEIGHT,
   DEBUG_FLAGS, POSITION_REWARDS, DEBUG_MODE,
+  computeLayout,
 } from '../constants.js';
 import { bus } from '../utils/eventBus.js';
 import { SeededRandom } from '../utils/seededRandom.js';
@@ -26,17 +24,15 @@ import { AudioManager } from '../managers/AudioManager.js';
 import { MatchStateMachine, STATES } from '../managers/MatchStateMachine.js';
 import { SYMBOLS } from '../data/symbolDefinitions.js';
 
-const CARD_W = CARD_SIZE * CELL_SIZE + (CARD_SIZE - 1) * CELL_GAP;
-
 export class MatchScene extends Phaser.Scene {
   constructor() { super('MatchScene'); }
 
   create() {
-    drawBackground(this);
-
     const W = this.scale.width;
     const H = this.scale.height;
-    const cx = W / 2;
+    this.L = computeLayout(W, H);
+
+    drawBackground(this);
 
     // Landscape orientation blocker
     this._buildOrientationBlocker();
@@ -51,13 +47,7 @@ export class MatchScene extends Phaser.Scene {
     const grid = generateCard(this.rngManager.getRng());
     this.cardManager = new BingoCardManager(grid);
 
-    // Layout
-    const controlY = H - SAFE_BOTTOM - CONTROL_HEIGHT;
-    const slotY = controlY - SLOT_HEIGHT - 24;
-    const timingY = slotY - TIMING_HEIGHT - 24;
-    const meterY = timingY - METER_HEIGHT - 16;
-    const cardX = (W - CARD_W) / 2;
-    const cardY = SAFE_TOP + HUD_HEIGHT + 60;
+    const L = this.L;
 
     // Managers
     this.meterManager = new MeterManager();
@@ -69,14 +59,14 @@ export class MatchScene extends Phaser.Scene {
     this.audioManager.init();
 
     // Components
-    this.bingoCard = new BingoCard(this, cardX, cardY, this.cardManager);
-    this.meterBar = new MeterBar(this, cardX, meterY);
-    this.timingBar = new TimingBar(this, cx, timingY);
-    this.slotMachine = new SlotMachine(this, cx, slotY, this.rngManager.getRng());
-    this.controlZone = new ControlZone(this, 0, controlY, W);
+    this.bingoCard = new BingoCard(this, L.cardX, L.cardY, this.cardManager, L);
+    this.meterBar = new MeterBar(this, L.cardX, L.meterY, L);
+    this.timingBar = new TimingBar(this, L.cx, L.timingY, L);
+    this.slotMachine = new SlotMachine(this, L.cx, L.slotY, this.rngManager.getRng(), L);
+    this.controlZone = new ControlZone(this, 0, L.controlY, W, L);
 
     // HUD
-    this._buildHUD(W);
+    this._buildHUD();
 
     // Countdown
     this._startCountdown();
@@ -111,20 +101,53 @@ export class MatchScene extends Phaser.Scene {
     this._buildDebugOverlay();
   }
 
-  _buildHUD(W) {
+  _buildHUD() {
+    const L = this.L;
     const hudBar = this.add.graphics();
     hudBar.fillStyle(COLOR.BG_DARK, 0.85);
-    hudBar.fillRect(0, 0, W, SAFE_TOP + HUD_HEIGHT);
+    hudBar.fillRect(0, 0, L.W, L.SAFE_TOP + L.HUD_HEIGHT);
     hudBar.lineStyle(1, 0x2A2A50, 0.6);
-    hudBar.lineBetween(0, SAFE_TOP + HUD_HEIGHT, W, SAFE_TOP + HUD_HEIGHT);
+    hudBar.lineBetween(0, L.SAFE_TOP + L.HUD_HEIGHT, L.W, L.SAFE_TOP + L.HUD_HEIGHT);
 
-    this.posText = this.add.text(40, SAFE_TOP + 30, '1st / 8', {
-      ...FONT.UI, fontSize: '26px', color: '#F0F0FF',
-    });
+    const hudY = L.SAFE_TOP + 10;
+    const pillH = Math.round(44 * L.sf);
+    const pillR = pillH / 2;
 
-    this.timerText = this.add.text(W - 40, SAFE_TOP + 30, '0:00', {
-      ...FONT.UI, fontSize: '26px', color: '#F0F0FF',
-    }).setOrigin(1, 0);
+    // Position pill
+    const posPill = this.add.graphics();
+    posPill.fillStyle(COLOR.BG_MID, 1);
+    posPill.lineStyle(1.5, COLOR.BORDER, 1);
+    posPill.fillRoundedRect(20, hudY, 200, pillH, pillR);
+    posPill.strokeRoundedRect(20, hudY, 200, pillH, pillR);
+
+    this.posText = this.add.text(120, hudY + pillH / 2, '1st / 8', {
+      ...FONT.UI, fontSize: `${Math.round(22 * L.sf)}px`, color: '#F0F0FF',
+    }).setOrigin(0.5);
+
+    // Timer pill
+    const timerPillX = L.W - 220;
+    const timerPill = this.add.graphics();
+    timerPill.fillStyle(COLOR.BG_MID, 1);
+    timerPill.lineStyle(1.5, COLOR.BORDER, 1);
+    timerPill.fillRoundedRect(timerPillX, hudY, 200, pillH, pillR);
+    timerPill.strokeRoundedRect(timerPillX, hudY, 200, pillH, pillR);
+
+    this.timerText = this.add.text(timerPillX + 100, hudY + pillH / 2, '0:00', {
+      ...FONT.UI, fontSize: `${Math.round(22 * L.sf)}px`, color: '#F0F0FF',
+    }).setOrigin(0.5);
+
+    // Streak badge pill (in HUD, right-center)
+    const streakPillW = Math.round(180 * L.sf);
+    const streakPillX = L.cx - streakPillW / 2;
+    this.streakPill = this.add.graphics();
+    this.streakPill.fillStyle(COLOR.BG_MID, 1);
+    this.streakPill.lineStyle(1.5, COLOR.BORDER, 1);
+    this.streakPill.fillRoundedRect(streakPillX, hudY, streakPillW, pillH, pillR);
+    this.streakPill.strokeRoundedRect(streakPillX, hudY, streakPillW, pillH, pillR);
+
+    this.streakHudText = this.add.text(L.cx, hudY + pillH / 2, '🔥 ×0', {
+      ...FONT.UI, fontSize: `${Math.round(22 * L.sf)}px`, color: '#FFFFFF',
+    }).setOrigin(0.5);
 
     // Update position + timer every 3 seconds
     this.time.addEvent({
@@ -160,7 +183,8 @@ export class MatchScene extends Phaser.Scene {
 
   _buildDebugOverlay() {
     if (!DEBUG_MODE) return;
-    this.debugText = this.add.text(10, SAFE_TOP + 70, '', {
+    const L = this.L;
+    this.debugText = this.add.text(10, L.SAFE_TOP + L.HUD_HEIGHT + 10, '', {
       ...FONT.LABEL, fontSize: '18px', color: '#00FF00',
       stroke: '#000000', strokeThickness: 2,
     }).setDepth(60);
@@ -190,6 +214,7 @@ export class MatchScene extends Phaser.Scene {
   }
 
   _startCountdown() {
+    const L = this.L;
     this.stateMachine.setState(STATES.COUNTDOWN);
 
     // Wire controls immediately
@@ -207,17 +232,16 @@ export class MatchScene extends Phaser.Scene {
     this._busOn('streak:milestone', (level) => this._onStreakMilestone(level));
     this._busOn('pressure:start', (data) => this._onPressureStart(data));
     this._busOn('pressure:end', () => this._onPressureEnd());
+    this._busOn('streak:updated', (count) => this._onStreakUpdated(count));
 
     // Countdown overlay
     const overlay = this.add.graphics();
     overlay.fillStyle(COLOR.BG_DARK, 0.7);
-    overlay.fillRect(0, 0, this.scale.width, this.scale.height);
+    overlay.fillRect(0, 0, L.W, L.H);
     overlay.setDepth(50);
 
-    const cx = this.scale.width / 2;
-    const cy = this.scale.height / 2;
-    const countdownText = this.add.text(cx, cy, '3', {
-      ...FONT.UI, fontSize: '120px', color: '#FFD700',
+    const countdownText = this.add.text(L.cx, L.H / 2, '3', {
+      ...FONT.UI, fontSize: `${Math.round(120 * L.sf)}px`, color: '#FFD700',
       stroke: '#8B6914', strokeThickness: 6,
     }).setOrigin(0.5).setDepth(51);
 
@@ -240,7 +264,6 @@ export class MatchScene extends Phaser.Scene {
           });
         }
         if (step >= steps.length - 1) {
-          // "GO!" — wait 400ms then fade overlay
           this.time.delayedCall(400, () => {
             this.tweens.add({
               targets: [overlay, countdownText],
@@ -321,7 +344,7 @@ export class MatchScene extends Phaser.Scene {
       } else {
         number = this.rngManager.getSpinNumber(this.cardManager, zone);
       }
-      this.wildGuaranteedColumn = null; // consumed
+      this.wildGuaranteedColumn = null;
     } else {
       number = this.rngManager.getSpinNumber(this.cardManager, zone);
     }
@@ -367,7 +390,6 @@ export class MatchScene extends Phaser.Scene {
     const closeResult = this.cardManager.closeNumber(number);
 
     // Process side effects from non-result reels
-    // Multiplier applies to NEXT spin; jackpot symbols and wilds are processed immediately
     const resultReelIndex = getColumnForNumber(number);
     for (let i = 0; i < results.length; i++) {
       if (i === resultReelIndex) continue;
@@ -407,7 +429,6 @@ export class MatchScene extends Phaser.Scene {
       // Check for near-hit (any zone — near-hits never break streak per §7.1)
       const nearHit = this.cardManager.isNearNumber(number, 5);
       if (nearHit) {
-        // Near-hit: partial meter charge, does NOT break streak
         this.meterManager.onNearHit(zone);
         this.bingoCard.setOverlay(nearHit.col, nearHit.row, 'hot');
         this.time.delayedCall(1500, () => {
@@ -416,7 +437,7 @@ export class MatchScene extends Phaser.Scene {
         bus.emit('card:near-hit', { number });
         this.spinLog.push({ zone, hit: false, nearHit: true });
       } else {
-        // Full miss: breaks streak, increments pity
+        // Full miss
         this.streakManager.onFullMiss();
         this.rngManager.recordMiss();
         this.meterManager.onFullMiss(this.rngManager.pityCounter);
@@ -445,7 +466,7 @@ export class MatchScene extends Phaser.Scene {
     this.stateMachine.setState(STATES.IDLE);
     this._enableSpin();
 
-    // 50-spin limit or 5-minute limit — force match end
+    // 50-spin limit or 5-minute limit
     if (this.spinCount >= 50 || this.matchTimer >= 300) {
       this._endMatch('bot', null);
       return;
@@ -461,6 +482,30 @@ export class MatchScene extends Phaser.Scene {
 
   _onJackpotEarned() {
     this.controlZone.setJackpotHasBall(true);
+  }
+
+  _onStreakUpdated(count) {
+    const L = this.L;
+    if (!this.streakHudText || !this.streakHudText.active) return;
+    this.streakHudText.setText(`🔥 ×${count}`);
+
+    const pillH = Math.round(44 * L.sf);
+    const streakPillW = Math.round(180 * L.sf);
+    const streakPillX = L.cx - streakPillW / 2;
+    const hudY = L.SAFE_TOP + 10;
+
+    if (this.streakPill && this.streakPill.active) {
+      this.streakPill.clear();
+      if (count >= 3) {
+        this.streakPill.fillStyle(COLOR.ORANGE_HOT, 1);
+        this.streakPill.lineStyle(1.5, COLOR.GOLD_DARK, 1);
+      } else {
+        this.streakPill.fillStyle(COLOR.BG_MID, 1);
+        this.streakPill.lineStyle(1.5, COLOR.BORDER, 1);
+      }
+      this.streakPill.fillRoundedRect(streakPillX, hudY, streakPillW, pillH, pillH / 2);
+      this.streakPill.strokeRoundedRect(streakPillX, hudY, streakPillW, pillH, pillH / 2);
+    }
   }
 
   _onJackpotButton() {
@@ -481,14 +526,15 @@ export class MatchScene extends Phaser.Scene {
     }
 
     // Overlay
+    const L = this.L;
     this.jackpotOverlay = this.add.graphics();
     this.jackpotOverlay.fillStyle(COLOR.BG_DARK, 0.5);
-    this.jackpotOverlay.fillRect(0, 0, this.scale.width, this.scale.height);
+    this.jackpotOverlay.fillRect(0, 0, L.W, L.H);
     this.jackpotOverlay.setDepth(20);
 
     // Cancel button
-    this.cancelBtn = makeTextButton(this, this.scale.width / 2,
-      this.scale.height - 200, 300, 80, 'CANCEL');
+    this.cancelBtn = makeTextButton(this, L.cx,
+      L.H - 200, 300, 80, 'CANCEL');
     this.cancelBtn.setDepth(30);
     this.cancelBtn.on('pointerdown', () => {
       this._cancelJackpotSelection();
@@ -512,17 +558,14 @@ export class MatchScene extends Phaser.Scene {
   _useJackpotBall(col, row) {
     if (!this.jackpotSelecting) return;
 
-    // Close cell
     this.cardManager.closeCell(col, row);
     this.bingoCard.closeCell(col, row, true);
     this.meterManager.useJackpotBall();
     this.jackpotUsedCount++;
     this.controlZone.setJackpotHasBall(this.meterManager.jackpotBalls > 0);
 
-    // Cleanup selection mode
     this._cleanupJackpotSelection();
 
-    // Check win
     if (this.cardManager.isWon()) {
       const completedLines = this.cardManager.getCompletedLines();
       completedLines.forEach(line => this.bingoCard.flashLineComplete(line));
@@ -569,9 +612,10 @@ export class MatchScene extends Phaser.Scene {
   }
 
   _onStreakMilestone(level) {
-    const txt = this.add.text(this.scale.width / 2, this.scale.height / 2 - 100,
+    const L = this.L;
+    const txt = this.add.text(L.cx, L.H / 2 - 100,
       `STREAK ×${level}!`, {
-        ...FONT.UI, fontSize: '48px', color: '#FFD700',
+        ...FONT.UI, fontSize: `${Math.round(48 * L.sf)}px`, color: '#FFD700',
         stroke: '#8B6914', strokeThickness: 4,
       }).setOrigin(0.5).setDepth(30);
 
@@ -587,11 +631,12 @@ export class MatchScene extends Phaser.Scene {
   _onPressureStart(data) {
     if (this.pressureActive) return;
     this.pressureActive = true;
+    const L = this.L;
 
     // Screen edge pulse
     this.pressureEdge = this.add.graphics();
     this.pressureEdge.lineStyle(40, COLOR.RED_PRESS, 1);
-    this.pressureEdge.strokeRect(0, 0, this.scale.width, this.scale.height);
+    this.pressureEdge.strokeRect(0, 0, L.W, L.H);
     this.pressureEdge.setAlpha(0);
     this.tweens.add({
       targets: this.pressureEdge,
@@ -601,14 +646,12 @@ export class MatchScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    // Speed up timing bar
-    this.timingBar.setSpeed(true); // temporary speed boost
+    this.timingBar.setSpeed(true);
 
-    // Banner
     const source = data.source === 'player' ? 'You are' : 'A player is';
-    const banner = this.add.text(this.scale.width / 2, 250,
+    const banner = this.add.text(L.cx, L.SAFE_TOP + L.HUD_HEIGHT + 40,
       `⚡ ${source} one cell away!`, {
-        ...FONT.UI, fontSize: '28px', color: '#FF6B6B',
+        ...FONT.UI, fontSize: `${Math.round(28 * L.sf)}px`, color: '#FF6B6B',
         stroke: '#0D0D1A', strokeThickness: 3,
       }).setOrigin(0.5).setDepth(30);
 
@@ -632,7 +675,6 @@ export class MatchScene extends Phaser.Scene {
 
   _onBotWon(data) {
     if (this.stateMachine.isMatchEnd()) return;
-    // Defer if player is mid-spin
     if (this.stateMachine.isSpinning()) {
       this._pendingBotWin = data;
       return;
@@ -663,12 +705,13 @@ export class MatchScene extends Phaser.Scene {
   }
 
   _showBingoAnimation(callback) {
+    const L = this.L;
     bus.emit('match:bingo');
 
     // Vignette
     const vignette = this.add.graphics();
     vignette.fillStyle(COLOR.BG_DARK, 0.6);
-    vignette.fillRect(0, 0, this.scale.width, this.scale.height);
+    vignette.fillRect(0, 0, L.W, L.H);
     vignette.setAlpha(0).setDepth(40);
 
     this.tweens.add({
@@ -678,7 +721,7 @@ export class MatchScene extends Phaser.Scene {
     });
 
     // BINGO overlay
-    const bingoImg = this.add.image(this.scale.width / 2, this.scale.height / 2 - 200,
+    const bingoImg = this.add.image(L.cx, L.H / 2 - 200,
       'overlay-bingo').setDepth(41).setScale(0.3).setAlpha(0);
 
     this.tweens.add({
@@ -691,7 +734,7 @@ export class MatchScene extends Phaser.Scene {
     // Confetti
     if (this.textures.exists('confetti')) {
       const confettiColors = [0xFFD700, 0x2ECC71, 0xFF8C00, 0xE74C3C, 0x3498DB, 0x9B59B6];
-      const emitter = this.add.particles(this.scale.width / 2, 0, 'confetti', {
+      const emitter = this.add.particles(L.cx, 0, 'confetti', {
         speed: { min: 100, max: 400 },
         angle: { min: 60, max: 120 },
         gravity: 300,
@@ -709,18 +752,21 @@ export class MatchScene extends Phaser.Scene {
   }
 
   _showBotWinNotice(botName, callback) {
+    const L = this.L;
     const bannerGfx = this.add.graphics();
-    const bx = this.scale.width / 2 - 400;
-    const by = 200;
+    const bw = Math.round(800 * L.sf);
+    const bh = Math.round(100 * L.sf);
+    const bx = L.cx - bw / 2;
+    const by = Math.round(200 * L.sf);
     bannerGfx.fillStyle(0x1A0A0A, 0.9);
     bannerGfx.lineStyle(2, COLOR.RED_PRESS, 1);
-    bannerGfx.fillRoundedRect(bx, by, 800, 100, 12);
-    bannerGfx.strokeRoundedRect(bx, by, 800, 100, 12);
+    bannerGfx.fillRoundedRect(bx, by, bw, bh, 12);
+    bannerGfx.strokeRoundedRect(bx, by, bw, bh, 12);
     bannerGfx.setDepth(40).setAlpha(0);
 
-    const bannerText = this.add.text(this.scale.width / 2, by + 50,
+    const bannerText = this.add.text(L.cx, by + bh / 2,
       `${botName} got BINGO!`, {
-        ...FONT.UI, fontSize: '30px', color: '#FF6B6B',
+        ...FONT.UI, fontSize: `${Math.round(30 * L.sf)}px`, color: '#FF6B6B',
       }).setOrigin(0.5).setDepth(41).setAlpha(0);
 
     this.tweens.add({
@@ -757,41 +803,36 @@ export class MatchScene extends Phaser.Scene {
 
   _onWildBallButton() {
     if (!this.stateMachine.isIdle() || !this.hasWildBall) return;
+    const L = this.L;
 
     this.stateMachine.setState(STATES.JACKPOT_SELECTING);
     this.wildSelecting = true;
     this.controlZone.setSpinEnabled(false);
 
-    // Show column headers as selectable — highlight column headers
-    const HEADER_COLORS_HEX = [0x3498DB, 0x9B59B6, 0x2ECC71, 0xFF8C00, 0xE74C3C];
     this.wildOverlay = this.add.graphics();
     this.wildOverlay.fillStyle(COLOR.BG_DARK, 0.5);
-    this.wildOverlay.fillRect(0, 0, this.scale.width, this.scale.height);
+    this.wildOverlay.fillRect(0, 0, L.W, L.H);
     this.wildOverlay.setDepth(20);
 
-    // "Pick a column" text
-    this.wildPickText = this.add.text(this.scale.width / 2, 200, 'Pick a column!', {
-      ...FONT.UI, fontSize: '36px', color: '#FFD700',
+    this.wildPickText = this.add.text(L.cx, Math.round(200 * L.sf), 'Pick a column!', {
+      ...FONT.UI, fontSize: `${Math.round(36 * L.sf)}px`, color: '#FFD700',
       stroke: '#0D0D1A', strokeThickness: 4,
     }).setOrigin(0.5).setDepth(25);
 
-    // Cancel button
-    this.wildCancelBtn = makeTextButton(this, this.scale.width / 2,
-      this.scale.height - 200, 300, 80, 'CANCEL');
+    this.wildCancelBtn = makeTextButton(this, L.cx,
+      L.H - 200, 300, 80, 'CANCEL');
     this.wildCancelBtn.setDepth(25);
     this.wildCancelBtn.on('pointerdown', () => {
       this._cancelWildSelection();
     });
 
-    // Column header tap handler
     this._wildTapHandler = (pointer) => {
-      const CARD_W = CARD_SIZE * CELL_SIZE + (CARD_SIZE - 1) * CELL_GAP;
-      const cardX = (this.scale.width - CARD_W) / 2;
+      const cardX = L.cardX;
       for (let c = 0; c < 5; c++) {
-        const colX = cardX + c * (CELL_SIZE + CELL_GAP);
-        const colW = CELL_SIZE;
-        const colY = SAFE_TOP + HUD_HEIGHT + 20;
-        const colH = CARD_W + 40;
+        const colX = cardX + c * (L.CELL_SIZE + L.CELL_GAP);
+        const colW = L.CELL_SIZE;
+        const colY = L.cardY - 40;
+        const colH = L.CARD_W + 80;
         if (pointer.x >= colX && pointer.x <= colX + colW &&
             pointer.y >= colY && pointer.y <= colY + colH) {
           this._selectWildColumn(c);
@@ -805,17 +846,14 @@ export class MatchScene extends Phaser.Scene {
   _selectWildColumn(colIndex) {
     if (!this.wildSelecting) return;
 
-    // Check if column has open cells
     const ranges = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
     const [lo, hi] = ranges[colIndex];
     const openInCol = this.cardManager.getOpenNumbers().filter(n => n >= lo && n <= hi);
 
     if (openInCol.length === 0) {
-      // Warn — consuming wild for nothing
       this.hasWildBall = false;
       this.controlZone.setWildBadge(false);
     } else {
-      // Guarantee next spin rolls a needed number from this column
       this.wildGuaranteedColumn = colIndex;
       this.hasWildBall = false;
       this.controlZone.setWildBadge(false);
@@ -844,14 +882,15 @@ export class MatchScene extends Phaser.Scene {
   }
 
   _buildOrientationBlocker() {
+    const L = this.L;
     const blocker = this.add.container(0, 0).setDepth(100).setVisible(false);
 
     const bg = this.add.graphics();
     bg.fillStyle(COLOR.BG_DARK, 0.95);
-    bg.fillRect(0, 0, this.scale.width, this.scale.height);
+    bg.fillRect(0, 0, L.W, L.H);
     blocker.add(bg);
 
-    const txt = this.add.text(this.scale.width / 2, this.scale.height / 2,
+    const txt = this.add.text(L.cx, L.H / 2,
       '📱 Please rotate to portrait', {
         ...FONT.UI, fontSize: '40px', color: '#F0F0FF',
       }).setOrigin(0.5);
@@ -859,14 +898,12 @@ export class MatchScene extends Phaser.Scene {
 
     this._orientationBlocker = blocker;
 
-    // Check orientation on resize
     this.scale.on('resize', () => {
       const isLandscape = this.scale.width > this.scale.height;
       this._orientationBlocker.setVisible(isLandscape);
     });
 
-    // Initial check
-    if (this.scale.width > this.scale.height) {
+    if (L.W > L.H) {
       this._orientationBlocker.setVisible(true);
     }
   }

@@ -10,41 +10,44 @@ export class ResultsScene extends Phaser.Scene {
     drawBackground(this);
 
     const W = this.scale.width;
+    const H = this.scale.height;
     const cx = W / 2;
+    const sf = Math.min(W / 1080, H / 2340);
+
     const data_ = data || {
       position: 1, totalPlayers: 8, cellsClosed: 0,
       bestStreak: 0, jackpotsUsed: 0, coinsEarned: 75,
     };
 
     // Main panel
-    const panelX = 90;
-    const panelY = 300;
-    const panelW = 900;
-    const panelH = 1300;
+    const panelW = Math.min(Math.round(900 * sf), W - 40);
+    const panelH = Math.round(1300 * sf);
+    const panelX = (W - panelW) / 2;
+    const panelY = Math.round(300 * sf);
     const panel = this.add.graphics();
     drawPanel(panel, panelX, panelY, panelW, panelH, 24);
 
     // "YOU PLACED"
-    this.add.text(cx, panelY + 60, 'YOU PLACED', {
-      ...FONT.UI, fontSize: '36px', color: '#F0F0FF',
+    this.add.text(cx, panelY + Math.round(60 * sf), 'YOU PLACED', {
+      ...FONT.UI, fontSize: `${Math.round(36 * sf)}px`, color: '#F0F0FF',
     }).setOrigin(0.5);
 
     // Position display
     const trophyMap = { 1: '🥇', 2: '🥈', 3: '🥉' };
     const trophy = trophyMap[data_.position] || '';
     if (trophy) {
-      this.add.text(cx, panelY + 160, trophy, {
-        fontSize: '96px',
+      this.add.text(cx, panelY + Math.round(160 * sf), trophy, {
+        fontSize: `${Math.round(96 * sf)}px`,
       }).setOrigin(0.5);
     }
 
     const ord = this._ordinal(data_.position);
-    this.add.text(cx, panelY + 260, `${ord} / ${data_.totalPlayers}`, {
-      ...FONT.UI, fontSize: '40px', color: '#F0F0FF',
+    this.add.text(cx, panelY + Math.round(260 * sf), `${ord} / ${data_.totalPlayers}`, {
+      ...FONT.UI, fontSize: `${Math.round(40 * sf)}px`, color: '#F0F0FF',
     }).setOrigin(0.5);
 
     // Stat rows
-    const statStartY = panelY + 360;
+    const statStartY = panelY + Math.round(360 * sf);
     const stats = [
       ['💰', 'Coins earned',  data_.coinsEarned],
       ['⬜', 'Cells closed',  `${data_.cellsClosed} / 24`],
@@ -53,18 +56,19 @@ export class ResultsScene extends Phaser.Scene {
     ];
 
     stats.forEach(([icon, label, value], i) => {
-      const sy = statStartY + i * 100;
-      const rowAlpha = { from: 0, to: 1 };
+      const sy = statStartY + i * Math.round(100 * sf);
 
       const row = this.add.container(cx, sy);
       row.setAlpha(0);
 
-      const iconTxt = this.add.text(-300, 0, icon, { fontSize: '36px' }).setOrigin(0, 0.5);
-      const labelTxt = this.add.text(-240, 0, label, {
-        ...FONT.LABEL, fontSize: '26px', color: '#A0A0C0',
+      const iconTxt = this.add.text(Math.round(-300 * sf), 0, icon, {
+        fontSize: `${Math.round(36 * sf)}px`,
       }).setOrigin(0, 0.5);
-      const valueTxt = this.add.text(300, 0, String(value), {
-        ...FONT.UI, fontSize: '30px', color: '#F0F0FF',
+      const labelTxt = this.add.text(Math.round(-240 * sf), 0, label, {
+        ...FONT.LABEL, fontSize: `${Math.round(26 * sf)}px`, color: '#A0A0C0',
+      }).setOrigin(0, 0.5);
+      const valueTxt = this.add.text(Math.round(300 * sf), 0, String(value), {
+        ...FONT.UI, fontSize: `${Math.round(30 * sf)}px`, color: '#F0F0FF',
       }).setOrigin(1, 0.5);
 
       row.add([iconTxt, labelTxt, valueTxt]);
@@ -76,7 +80,6 @@ export class ResultsScene extends Phaser.Scene {
         delay: i * 100,
       });
 
-      // Animate coins counter
       if (i === 0 && typeof value === 'number') {
         const counter = this.tweens.addCounter({
           from: 0,
@@ -94,9 +97,15 @@ export class ResultsScene extends Phaser.Scene {
     addCoins(data_.coinsEarned);
 
     // Buttons
-    const btnY = panelY + panelH - 200;
-    const playAgain = makeTextButton(this, cx, btnY, 400, 100, 'PLAY AGAIN');
-    const mainMenu = makeTextButton(this, cx, btnY + 130, 400, 100, 'MAIN MENU');
+    const btnW = Math.round(400 * sf);
+    const btnH = Math.round(100 * sf);
+    const btnY = panelY + panelH - Math.round(200 * sf);
+    const playAgain = makeTextButton(this, cx, btnY, btnW, btnH, 'PLAY AGAIN', {
+      fontSize: `${Math.round(32 * sf)}px`,
+    });
+    const mainMenu = makeTextButton(this, cx, btnY + Math.round(130 * sf), btnW, btnH, 'MAIN MENU', {
+      fontSize: `${Math.round(32 * sf)}px`,
+    });
 
     playAgain.on('pointerdown', () => {
       this.scene.start('MatchScene');

@@ -1,20 +1,22 @@
 import { COLOR, FONT } from '../constants.js';
 
 export class ControlZone {
-  constructor(scene, x, y, W) {
+  constructor(scene, x, y, W, L) {
     this.scene = scene;
     this.x = x;
     this.y = y;
     this.W = W;
+    this.L = L;
     this.fastMode = false;
     this.hasWildBall = false;
 
-    const btnY = y + 80;
+    const sf = L.sf;
+    const btnY = y + Math.round(80 * sf);
     const spinX = x + W / 2;
     const jackpotX = x + W * 0.2;
     const speedX = x + W * 0.8;
 
-    // SPIN button — fires on pointerdown for faster feel
+    // SPIN button
     this.spinBtn = scene.add.image(spinX, btnY, 'btn-spin-normal')
       .setInteractive({ useHandCursor: true })
       .setDepth(5);
@@ -51,9 +53,9 @@ export class ControlZone {
       if (this.onSpeedToggle) this.onSpeedToggle(this.fastMode);
     });
 
-    // Wild ball indicator (initially hidden)
-    this.wildBadge = scene.add.text(jackpotX + 60, btnY - 40, '🌟', {
-      fontSize: '28px',
+    // Wild ball indicator
+    this.wildBadge = scene.add.text(jackpotX + Math.round(60 * sf), btnY - Math.round(40 * sf), '🌟', {
+      fontSize: `${Math.round(28 * sf)}px`,
     }).setOrigin(0.5).setAlpha(0).setDepth(6).setInteractive({ useHandCursor: true });
 
     this.wildBadge.on('pointerdown', () => {

@@ -26,6 +26,7 @@ export class MatchStateMachine {
   }
 
   setState(next) {
+    if (this.state === next) return true; // already there
     const allowed = TRANSITIONS[this.state];
     if (!allowed || !allowed.includes(next)) {
       console.warn(`[StateMachine] Invalid transition: ${this.state} → ${next}`);

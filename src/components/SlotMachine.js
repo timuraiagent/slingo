@@ -3,55 +3,70 @@ import { bus } from '../utils/eventBus.js';
 import { SYMBOLS } from '../data/symbolDefinitions.js';
 
 const REEL_COUNT = 5;
-const SYMBOL_H = 140;
-const SYMBOL_W = 168;
-const REEL_W = SYMBOL_W;
-const REEL_H = SYMBOL_H * 3;
 const STRIP_LENGTH = 16;
-const SLOT_W = REEL_COUNT * REEL_W + (REEL_COUNT - 1) * 12 + 80;
 
 export class SlotMachine {
-  constructor(scene, x, y, rng) {
+  constructor(scene, x, y, rng, L) {
     this.scene = scene;
     this.x = x;
     this.y = y;
     this.rng = rng;
+    this.L = L;
     this.reels = [];
     this.spinning = false;
     this.results = null;
 
+    const SYMBOL_W = L.SYMBOL_W;
+    const SYMBOL_H = L.SYMBOL_H;
+    const REEL_W = SYMBOL_W;
+    const REEL_H = SYMBOL_H * 3;
+    const REEL_GAP = Math.round(12 * L.sf);
+    const PADDING = Math.round(40 * L.sf);
+    const SLOT_W = REEL_COUNT * REEL_W + (REEL_COUNT - 1) * REEL_GAP + PADDING * 2;
+    const SLOT_H = REEL_H;
+
+    this.SYMBOL_W = SYMBOL_W;
+    this.SYMBOL_H = SYMBOL_H;
+    this.REEL_W = REEL_W;
+    this.REEL_H = REEL_H;
+    this.REEL_GAP = REEL_GAP;
+    this.PADDING = PADDING;
+    this.SLOT_W = SLOT_W;
+    this.SLOT_H = SLOT_H;
+
     const slotX = x - SLOT_W / 2;
     const slotY = y;
-    const slotH = REEL_H;
+    this.slotX = slotX;
+    this.slotY = slotY;
 
-    // Outer frame
+    // Outer frame with visible border
     this.frame = scene.add.graphics();
     this.frame.fillStyle(COLOR.BG_DARK, 1);
     this.frame.lineStyle(3, COLOR.BORDER, 1);
-    this.frame.fillRoundedRect(slotX, slotY, SLOT_W, slotH, 24);
-    this.frame.strokeRoundedRect(slotX, slotY, SLOT_W, slotH, 24);
+    this.frame.fillRoundedRect(slotX, slotY, SLOT_W, SLOT_H, 24);
+    this.frame.strokeRoundedRect(slotX, slotY, SLOT_W, SLOT_H, 24);
 
     // Per-reel backgrounds + masks
-    const innerX = slotX + 40;
+    const innerX = slotX + PADDING;
 
     for (let i = 0; i < REEL_COUNT; i++) {
-      const reelX = innerX + i * (REEL_W + 12);
+      const reelX = innerX + i * (REEL_W + REEL_GAP);
 
-      // Reel bg
+      // Reel bg — visible dark background behind symbols
       const rbg = scene.add.graphics();
       rbg.fillStyle(0x13131F, 1);
       rbg.lineStyle(1, 0x2A2A50, 1);
-      rbg.fillRect(reelX, slotY + 10, REEL_W, slotH - 20);
+      rbg.fillRect(reelX, slotY + 10, REEL_W, SLOT_H - 20);
+      rbg.strokeRect(reelX, slotY + 10, REEL_W, SLOT_H - 20);
 
       // Mask for the reel area
       const maskGfx = scene.make.graphics();
-      maskGfx.fillRect(reelX, slotY + 10, REEL_W, slotH - 20);
+      maskGfx.fillRect(reelX, slotY + 10, REEL_W, SLOT_H - 20);
       const mask = maskGfx.createGeometryMask();
 
-      // Create the scrolling strip container
+      // Scrolling strip container
       const strip = scene.add.container(reelX + REEL_W / 2, slotY + 10);
 
-      // Build initial symbols for the strip
       const symbols = [];
       for (let s = 0; s < STRIP_LENGTH; s++) {
         const sym = this._makeSymbol(s, null);
@@ -60,32 +75,35 @@ export class SlotMachine {
       }
       strip.y = slotY + 10;
 
-      // Apply mask
       strip.setMask(mask);
 
-      // Flash overlay
+      // Flash overlay (for settle effect)
       const flash = scene.add.graphics();
       flash.fillStyle(0xFFFFFF, 1);
       flash.fillRect(reelX, slotY + 10 + SYMBOL_H, REEL_W, SYMBOL_H);
       flash.setAlpha(0);
 
+      // Result row highlight — translucent gold, 2px border top+bottom only
+      const resultHighlight = scene.add.graphics();
+      resultHighlight.lineStyle(2, COLOR.GOLD, 0.8);
+      resultHighlight.lineBetween(reelX, slotY + 10 + SYMBOL_H, reelX + REEL_W, slotY + 10 + SYMBOL_H);
+      resultHighlight.lineBetween(reelX, slotY + 10 + SYMBOL_H * 2, reelX + REEL_W, slotY + 10 + SYMBOL_H * 2);
+      // Subtle gold fill
+      resultHighlight.fillStyle(COLOR.GOLD, 0.08);
+      resultHighlight.fillRect(reelX, slotY + 10 + SYMBOL_H, REEL_W, SYMBOL_H);
+      resultHighlight.setDepth(10);
+
       this.reels.push({
-        strip, symbols, mask, maskGfx, flash, rbg,
+        strip, symbols, mask, maskGfx, flash, rbg, resultHighlight,
         reelX, slotY,
         resultSymbol: null,
       });
     }
-
-    // Result row indicator image
-    const resultRowY = slotY + 10 + SYMBOL_H - 8;
-    if (scene.textures.exists('reel-result-row')) {
-      this.resultRowImg = scene.add.image(slotX + SLOT_W / 2, resultRowY + SYMBOL_H / 2 + 8, 'reel-result-row')
-        .setDisplaySize(SLOT_W - 20, SYMBOL_H + 16)
-        .setDepth(10);
-    }
   }
 
   _makeSymbol(index, symbolDef) {
+    const SYMBOL_W = this.SYMBOL_W;
+    const SYMBOL_H = this.SYMBOL_H;
     const container = this.scene.add.container(0, index * SYMBOL_H + SYMBOL_H / 2);
 
     if (symbolDef && symbolDef.id === 'jackpot') {
@@ -104,7 +122,7 @@ export class SlotMachine {
 
       const label = symbolDef ? String(symbolDef.label) : String(this.rng.intBetween(1, 75));
       const txt = this.scene.add.text(0, 0, label, {
-        ...FONT.NUMBER, fontSize: '36px', color: '#F0F0FF',
+        ...FONT.NUMBER, fontSize: `${Math.round(SYMBOL_H * 0.4)}px`, color: '#F0F0FF',
       }).setOrigin(0.5);
       container.add(txt);
     }
@@ -143,11 +161,11 @@ export class SlotMachine {
       }
 
       // Reset strip position
-      const startY = this.y + 10;
+      const startY = this.slotY + 10;
       reel.strip.y = startY;
 
       // Target y so resultIndex lands at the middle row
-      const targetY = startY - (resultIndex - 1) * SYMBOL_H;
+      const targetY = startY - (resultIndex - 1) * this.SYMBOL_H;
 
       // Staggered start
       this.scene.time.delayedCall(i * 80, () => {
@@ -192,9 +210,9 @@ export class SlotMachine {
       r.maskGfx.destroy();
       r.flash.destroy();
       r.rbg.destroy();
+      r.resultHighlight.destroy();
     });
     this.reels = [];
     if (this.frame) this.frame.destroy();
-    if (this.resultRowImg) this.resultRowImg.destroy();
   }
 }
