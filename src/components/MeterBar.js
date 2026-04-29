@@ -39,8 +39,8 @@ export class MeterBar {
   }
 
   _createSegments() {
-    this.jackpotLabel = this.scene.add.text(this.x, this.y - 32, 'JACKPOT', {
-      ...FONT.UI, fontSize: '28px', color: '#FFD700',
+    this.jackpotLabel = this.scene.add.text(this.x, this.y - 40, 'JACKPOT', {
+      ...FONT.UI, fontSize: '36px', color: '#FFD700',
     }).setOrigin(0, 0.5);
 
     for (let i = 0; i < 5; i++) {
@@ -80,7 +80,7 @@ export class MeterBar {
     this.streakBg.strokeRoundedRect(sx, this.y, 110, SEG_H, 18);
 
     this.streakText = this.scene.add.text(sx + 55, this.y + SEG_H / 2, 'STREAK x0', {
-      ...FONT.UI, fontSize: '18px', color: '#FFFFFF',
+      ...FONT.UI, fontSize: '24px', color: '#FFFFFF',
     }).setOrigin(0.5);
   }
 

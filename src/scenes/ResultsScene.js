@@ -28,7 +28,7 @@ export class ResultsScene extends Phaser.Scene {
     panel.strokeRoundedRect(panelX, panelY, panelW, panelH, 24);
 
     this.add.text(W / 2, panelY + 80, 'YOU PLACED', {
-      ...FONT.UI, fontSize: '36px', color: '#F0F0FF',
+      ...FONT.UI, fontSize: '72px', color: '#F0F0FF',
     }).setOrigin(0.5);
 
     const trophyMap = { 1: '🥇', 2: '🥈', 3: '🥉' };
@@ -36,12 +36,12 @@ export class ResultsScene extends Phaser.Scene {
     const suffix = suffixMap[data.position] || 'th';
 
     if (trophyMap[data.position]) {
-      this.add.text(W / 2, panelY + 180, trophyMap[data.position], {
-        fontSize: '96px',
+      this.add.text(W / 2, panelY + 220, trophyMap[data.position], {
+        fontSize: '140px',
       }).setOrigin(0.5);
     }
-    this.add.text(W / 2, panelY + 280, `${data.position}${suffix} / ${data.totalPlayers}`, {
-      ...FONT.UI, fontSize: '52px', color: '#FFD700',
+    this.add.text(W / 2, panelY + 380, `${data.position}${suffix} / ${data.totalPlayers}`, {
+      ...FONT.UI, fontSize: '104px', color: '#FFD700',
     }).setOrigin(0.5);
 
     const rows = [
@@ -52,9 +52,9 @@ export class ResultsScene extends Phaser.Scene {
     ];
 
     rows.forEach(([icon, label, value], i) => {
-      const y = panelY + 420 + i * 80;
+      const y = panelY + 560 + i * 110;
       const rowText = this.add.text(W / 2, y, `${icon} ${label}: ${value}`, {
-        ...FONT.UI, fontSize: '30px', color: '#F0F0FF',
+        ...FONT.UI, fontSize: '60px', color: '#F0F0FF',
       }).setOrigin(0.5).setAlpha(0);
       this.tweens.add({
         targets: rowText,
@@ -64,11 +64,11 @@ export class ResultsScene extends Phaser.Scene {
       });
     });
 
-    makeTextButton(this, W / 2, panelY + panelH - 180, 320, 80, 'PLAY AGAIN', { fontSize: '32px' }, () => {
+    makeTextButton(this, W / 2, panelY + panelH - 240, 400, 100, 'PLAY AGAIN', { fontSize: '48px' }, () => {
       this.scene.start('MatchScene');
     });
 
-    makeTextButton(this, W / 2, panelY + panelH - 80, 320, 80, 'MAIN MENU', { fontSize: '32px' }, () => {
+    makeTextButton(this, W / 2, panelY + panelH - 110, 400, 100, 'MAIN MENU', { fontSize: '48px' }, () => {
       this.scene.start('MenuScene');
     });
   }

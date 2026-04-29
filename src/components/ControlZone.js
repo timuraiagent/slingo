@@ -19,9 +19,9 @@ export class ControlZone {
 
   _createButtons() {
     const halfW = this.width / 2;
-    const jackpotX = this.x - halfW + 120;
+    const jackpotX = this.x - halfW + 80;
     const spinX = this.x;
-    const speedX = this.x + halfW - 120;
+    const speedX = this.x + halfW - 80;
 
     // SPIN button
     this.spinBtn = this.scene.add.image(spinX, this.y, 'btn-spin-normal')
@@ -59,9 +59,9 @@ export class ControlZone {
       if (this.onSpeed) this.onSpeed(this.fastMode);
     });
 
-    // Wild badge (hidden by default)
-    this.wildBadge = this.scene.add.text(jackpotX - 60, this.y - 20, '🌟', {
-      fontSize: '28px',
+    // Wild badge (hidden by default) — placed above SPIN so it doesn't overlap JACKPOT
+    this.wildBadge = this.scene.add.text(spinX, this.y - 70, 'WILD 🌟', {
+      fontFamily: 'Nunito', fontSize: '24px', fontStyle: 'bold', color: '#FFD700',
     }).setOrigin(0.5).setVisible(false);
   }
 

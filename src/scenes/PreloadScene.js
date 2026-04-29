@@ -40,20 +40,15 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('reel-result-row', 'assets/G12.png');
     this.load.image('popup-jackpot', 'assets/G13.png');
 
-    // Audio (10 pairs)
-    const audioKeys = [
-      'reel-spin', 'reel-stop', 'useful-hit', 'near-hit',
-      'jackpot-segment', 'jackpot-earned', 'perfect-timing',
-      'cell-close', 'bingo-win', 'pressure-start',
-    ];
-    for (const k of audioKeys) {
-      this.load.audio(k, [`assets/audio/${k}.mp3`, `assets/audio/${k}.ogg`]);
-    }
-
-    this.load.on('loaderror', (file) => {
-      // Gracefully ignore missing audio files until Phase 10
-      console.warn('Asset load failed (ignored):', file.key, file.type);
-    });
+    // Audio disabled until Phase 10 to prevent console errors
+    // const audioKeys = [
+    //   'reel-spin', 'reel-stop', 'useful-hit', 'near-hit',
+    //   'jackpot-segment', 'jackpot-earned', 'perfect-timing',
+    //   'cell-close', 'bingo-win', 'pressure-start',
+    // ];
+    // for (const k of audioKeys) {
+    //   this.load.audio(k, [`assets/audio/${k}.mp3`, `assets/audio/${k}.ogg`]);
+    // }
   }
 
   create() {
