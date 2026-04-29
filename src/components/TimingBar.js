@@ -120,7 +120,7 @@ export class TimingBar {
   }
 
   lock() {
-    if (!this.active || this.locked || !this._canLock) return null;
+    if (!this.active || this.locked) return null;
     this.locked = true;
 
     const position = (this.marker.x - this.barX) / this.BAR_W;
@@ -204,6 +204,10 @@ export class TimingBar {
 
   deactivate() {
     this.reset();
+  }
+
+  canAutoLock() {
+    return this._canLock;
   }
 
   destroy() {}

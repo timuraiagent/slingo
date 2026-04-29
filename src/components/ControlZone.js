@@ -66,7 +66,7 @@ export class ControlZone {
     // Wild ball indicator — between JACKPOT and SPIN buttons
     const wildX = (jackpotX + spinX) / 2;
     this.wildBadge = scene.add.text(wildX, btnY - Math.round(50 * sf), '🌟', {
-      fontSize: `${Math.round(40 * sf)}px`,
+      fontSize: `${Math.round(70 * sf)}px`,
     }).setOrigin(0.5).setAlpha(0).setDepth(6).setInteractive({ useHandCursor: true });
 
     this.wildBadge.on('pointerdown', () => {

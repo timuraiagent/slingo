@@ -316,6 +316,11 @@ export class MatchScene extends Phaser.Scene {
     if (this.spinTimer) this.spinTimer.remove();
     this.spinTimer = this.time.delayedCall(3000, () => {
       if (this.stateMachine.isIdle() && this.matchActive) {
+        // Only auto-fire if the timing bar has traversed enough
+        if (!this.timingBar.canAutoLock()) {
+          this._resetAutoFire();
+          return;
+        }
         this._onSpin();
       }
     });
@@ -329,7 +334,6 @@ export class MatchScene extends Phaser.Scene {
     const timingResult = this.timingBar.lock();
     if (!timingResult) {
       this.stateMachine.setState(STATES.IDLE);
-      // Re-arm auto-fire to retry once marker has traversed enough
       this._resetAutoFire();
       return;
     }
@@ -558,6 +562,12 @@ export class MatchScene extends Phaser.Scene {
     this.jackpotOverlay.fillRect(0, 0, L.W, L.H);
     this.jackpotOverlay.setDepth(20);
 
+    // Instruction text
+    this.jackpotPickText = this.add.text(L.cx, Math.round(200 * L.sf), 'Choose number', {
+      ...FONT.UI, fontSize: `${Math.round(36 * L.sf)}px`, color: '#FFD700',
+      stroke: '#0D0D1A', strokeThickness: 4,
+    }).setOrigin(0.5).setDepth(25);
+
     // Cancel button
     this.cancelBtn = makeTextButton(this, L.cx,
       L.H - 200, 300, 80, 'CANCEL');
@@ -620,6 +630,10 @@ export class MatchScene extends Phaser.Scene {
     if (this.cancelBtn) {
       this.cancelBtn.destroy();
       this.cancelBtn = null;
+    }
+    if (this.jackpotPickText) {
+      this.jackpotPickText.destroy();
+      this.jackpotPickText = null;
     }
     if (this._jackpotTapHandler) {
       this.input.off('pointerdown', this._jackpotTapHandler);
@@ -841,13 +855,30 @@ export class MatchScene extends Phaser.Scene {
     this.wildOverlay.fillRect(0, 0, L.W, L.H);
     this.wildOverlay.setDepth(20);
 
-    this.wildPickText = this.add.text(L.cx, Math.round(200 * L.sf), 'Pick a column!', {
+    this.wildPickText = this.add.text(L.cx, Math.round(200 * L.sf), 'Choose COLUMN', {
       ...FONT.UI, fontSize: `${Math.round(36 * L.sf)}px`, color: '#FFD700',
       stroke: '#0D0D1A', strokeThickness: 4,
     }).setOrigin(0.5).setDepth(25);
 
     this.wildCancelBtn = makeTextButton(this, L.cx,
       L.H - 200, 300, 80, 'CANCEL');
+    this.wildCancelBtn.setDepth(25);
+
+    // Column highlight cycling hint
+    this._wildColHighlight = this.add.graphics().setDepth(22);
+    this._wildColIndex = 0;
+    this._wildColTimer = this.time.addEvent({
+      delay: 600,
+      repeat: -1,
+      callback: () => {
+        this._wildColHighlight.clear();
+        this._wildColHighlight.fillStyle(0xFFFFFF, 0.15);
+        const c = this._wildColIndex % 5;
+        const colX = L.cardX + c * (L.CELL_SIZE + L.CELL_GAP);
+        this._wildColHighlight.fillRect(colX - 4, L.cardY - 40, L.CELL_SIZE + 8, L.CARD_W + 80);
+        this._wildColIndex++;
+      },
+    });
     this.wildCancelBtn.setDepth(25);
     this.wildCancelBtn.on('pointerdown', () => {
       this._cancelWildSelection();
@@ -902,6 +933,8 @@ export class MatchScene extends Phaser.Scene {
     if (this.wildOverlay) { this.wildOverlay.destroy(); this.wildOverlay = null; }
     if (this.wildPickText) { this.wildPickText.destroy(); this.wildPickText = null; }
     if (this.wildCancelBtn) { this.wildCancelBtn.destroy(); this.wildCancelBtn = null; }
+    if (this._wildColTimer) { this._wildColTimer.remove(); this._wildColTimer = null; }
+    if (this._wildColHighlight) { this._wildColHighlight.destroy(); this._wildColHighlight = null; }
     if (this._wildTapHandler) {
       this.input.off('pointerdown', this._wildTapHandler);
       this._wildTapHandler = null;
