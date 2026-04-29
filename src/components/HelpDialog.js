@@ -223,7 +223,7 @@ export class HelpDialog {
     line.setDepth(57);
     this.content.add(line);
     this._add(line);
-    return y + Math.round(16 * sf);
+    return y + Math.round(16 * this.sf);
   }
 
   _makeButton(x, y, w, h, label) {
