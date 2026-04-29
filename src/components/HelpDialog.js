@@ -24,12 +24,13 @@ export class HelpDialog {
     const panelH = Math.round(1900 * sf);
     const panelX = (W - panelW) / 2;
     const panelY = Math.round(60 * sf);
+    const cornerR = 24;
 
     const panel = scene.add.graphics();
     panel.fillStyle(COLOR.BG_MID, 1);
     panel.lineStyle(2, COLOR.BORDER, 1);
-    panel.fillRoundedRect(panelX, panelY, panelW, panelH, 24);
-    panel.strokeRoundedRect(panelX, panelY, panelW, panelH, 24);
+    panel.fillRoundedRect(panelX, panelY, panelW, panelH, cornerR);
+    panel.strokeRoundedRect(panelX, panelY, panelW, panelH, cornerR);
     panel.setDepth(56);
     this._add(panel);
 
@@ -38,12 +39,23 @@ export class HelpDialog {
     this.content.setDepth(57);
     this._add(this.content);
 
-    // Covers to hide overflow
-    const topCover = scene.add.rectangle(panelX + panelW / 2, panelY / 2, panelW + 40, panelY + 4, COLOR.BG_DARK, 1);
+    // Covers to hide overflow — inset so they don't cover panel border/corners
+    const coverPad = 6;
+    const topCover = scene.add.rectangle(
+      panelX + panelW / 2, panelY / 2,
+      panelW - coverPad * 2, panelY - cornerR + 2,
+      COLOR.BG_DARK, 1
+    );
     topCover.setDepth(58);
     this._add(topCover);
-    const bottomCoverY = panelY + panelH + (H - panelY - panelH) / 2;
-    const bottomCover = scene.add.rectangle(panelX + panelW / 2, bottomCoverY, panelW + 40, H - panelY - panelH + 4, COLOR.BG_DARK, 1);
+
+    const bottomStripTop = panelY + panelH - cornerR;
+    const bottomStripH = H - bottomStripTop;
+    const bottomCover = scene.add.rectangle(
+      panelX + panelW / 2, bottomStripTop + bottomStripH / 2,
+      panelW - coverPad * 2, bottomStripH + 4,
+      COLOR.BG_DARK, 1
+    );
     bottomCover.setDepth(58);
     this._add(bottomCover);
 
@@ -85,24 +97,40 @@ export class HelpDialog {
 
     // Timing bar
     y = this._addSectionHeader('TIMING BAR', 0, y);
+    const timingHint = this._addText('Hit SPIN when the marker is in the zone:', 0, y, {
+      ...FONT.LABEL, fontSize: `${Math.round(36 * sf)}px`, color: '#A0A0C0',
+      wordWrap: { width: panelW - pad * 2 },
+    });
+    y = timingHint.y + timingHint.height + Math.round(10 * sf);
+
     const zones = [
-      ['PERFECT', '+25 charge', '#2ECC71'],
-      ['GREAT',   '+18 charge', '#FFD700'],
-      ['GOOD',    '+12 charge', '#FF8C00'],
-      ['MISS',    '+8 charge',  '#E74C3C'],
+      ['PERFECT', 'Best meter fill', '#2ECC71'],
+      ['GREAT',   'Strong meter fill', '#FFD700'],
+      ['GOOD',    'Decent meter fill', '#FF8C00'],
+      ['MISS',    'Minimal meter fill', '#E74C3C'],
     ];
     zones.forEach(([label, desc, color]) => {
       const row = this.scene.add.container(0, y);
       const lbl = this.scene.add.text(-halfW + pad, 0, label, {
         ...FONT.UI, fontSize: `${Math.round(38 * sf)}px`, color,
       }).setOrigin(0, 0);
-      const dsc = this.scene.add.text(-halfW + pad + Math.round(220 * sf), 0, desc, {
+      const dsc = this.scene.add.text(0, 0, '— ' + desc, {
         ...FONT.LABEL, fontSize: `${Math.round(36 * sf)}px`, color: '#A0A0C0',
       }).setOrigin(0, 0);
+      // Position description after label
+      dsc.setX(lbl.x + lbl.width + Math.round(12 * sf));
       row.add([lbl, dsc]);
       this.content.add(row);
       this._add(row);
-      y += Math.max(lbl.height, dsc.height) + Math.round(10 * sf);
+      const rowH = Math.max(lbl.height, dsc.height);
+      // If description overflows right edge, move it below the label
+      if (dsc.x + dsc.width > halfW - pad) {
+        dsc.setX(lbl.x);
+        dsc.setY(lbl.height + Math.round(4 * sf));
+        y += lbl.height + dsc.height + Math.round(10 * sf);
+      } else {
+        y += rowH + Math.round(10 * sf);
+      }
     });
 
     y += Math.round(10 * sf);
@@ -115,7 +143,7 @@ export class HelpDialog {
       wordWrap: { width: panelW - pad * 2 },
     });
     y = meterNote.y + meterNote.height + Math.round(10 * sf);
-    const jackpotNote = this._addText('★ = +30 charge  |  Jackpot ball closes ANY cell', 0, y, {
+    const jackpotNote = this._addText('★ = +30 meter fill  |  Ball closes ANY cell', 0, y, {
       ...FONT.LABEL, fontSize: `${Math.round(38 * sf)}px`, color: '#FFD700',
       wordWrap: { width: panelW - pad * 2 },
     });
@@ -123,36 +151,37 @@ export class HelpDialog {
 
     y = this._addDivider(y, halfW);
 
-    // Special symbols
+    // Special symbols — two rows each: symbol+name on first, description on second
     y = this._addSectionHeader('SPECIAL SYMBOLS', 0, y);
     const symbols = [
-      { symbol: '★', color: '#FFD700', name: 'JACKPOT', desc: '+30 meter charge' },
-      { symbol: 'W', color: '#B060E0', name: 'WILD', desc: 'Pick column, guaranteed match' },
-      { symbol: '×2', color: '#FF8C00', name: 'MULTI', desc: 'Doubles next charge' },
+      { symbol: '★', color: '#FFD700', name: 'JACKPOT', desc: 'Instantly adds +30 meter fill' },
+      { symbol: 'W', color: '#B060E0', name: 'WILD', desc: 'Pick column — next spin guaranteed match' },
+      { symbol: '×2', color: '#FF8C00', name: 'MULTIPLIER', desc: 'Doubles next spin\'s meter fill' },
     ];
     symbols.forEach(s => {
       const row = this.scene.add.container(0, y);
       const sym = this.scene.add.text(-halfW + pad, 0, s.symbol, {
         ...FONT.UI, fontSize: `${Math.round(40 * sf)}px`, color: s.color,
       }).setOrigin(0, 0);
-      const name = this.scene.add.text(-halfW + pad + Math.round(70 * sf), 0, s.name, {
+      const name = this.scene.add.text(-halfW + pad + Math.round(60 * sf), 0, s.name, {
         ...FONT.UI, fontSize: `${Math.round(36 * sf)}px`, color: '#F0F0FF',
       }).setOrigin(0, 0);
-      const desc = this.scene.add.text(-halfW + pad + Math.round(240 * sf), 0, s.desc, {
-        ...FONT.LABEL, fontSize: `${Math.round(36 * sf)}px`, color: '#A0A0C0',
+      const desc = this.scene.add.text(-halfW + pad + Math.round(16 * sf), Math.max(sym.height, name.height) + Math.round(4 * sf), s.desc, {
+        ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#A0A0C0',
+        wordWrap: { width: panelW - pad * 2 - Math.round(16 * sf) },
       }).setOrigin(0, 0);
       row.add([sym, name, desc]);
       this.content.add(row);
       this._add(row);
-      y += Math.max(sym.height, name.height, desc.height) + Math.round(10 * sf);
+      y += Math.max(sym.height, name.height) + desc.height + Math.round(18 * sf);
     });
 
-    y += Math.round(28 * sf);
+    y += Math.round(20 * sf);
 
-    // GOT IT button
+    // OK button (centered, below content)
     const btnW = Math.round(340 * sf);
     const btnH = Math.round(96 * sf);
-    const btn = this._makeButton(0, y, btnW, btnH, 'GOT IT!');
+    const btn = this._makeButton(0, y, btnW, btnH, 'OK');
     this._add(btn);
 
     this.contentHeight = y + btnH + Math.round(30 * sf);
