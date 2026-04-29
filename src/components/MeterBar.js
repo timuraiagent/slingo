@@ -12,21 +12,20 @@ export class MeterBar {
     this._handlers = [];
     this.segments = [];
 
+    const sf = L.sf;
     const CARD_W = L.CARD_W;
-    const SEG_H = Math.max(Math.round(36 * L.sf), 20);
-    const SEG_GAP = Math.max(Math.round(8 * L.sf), 3);
-    const SEG_W = Math.max(Math.round((CARD_W - (SEGMENTS - 1) * SEG_GAP) / SEGMENTS), 20);
+    const SEG_H = Math.round(36 * sf);
+    const SEG_GAP = Math.round(10 * sf);
+    const SEG_W = Math.round((CARD_W - (SEGMENTS - 1) * SEG_GAP) / SEGMENTS);
     this.SEG_W = SEG_W;
     this.SEG_H = SEG_H;
     this.SEG_GAP = SEG_GAP;
 
-    // JACKPOT label — gold, centered, enforce minimum font size
-    const jackpotFontSize = Math.max(Math.round(SEG_H * 0.7), 14);
+    // JACKPOT label
     scene.add.text(x + CARD_W / 2, y - 4, 'JACKPOT', {
-      ...FONT.UI, fontSize: `${jackpotFontSize}px`, color: '#FFD700',
+      ...FONT.UI, fontSize: `${Math.round(20 * sf)}px`, color: '#FFD700',
     }).setOrigin(0.5, 1);
 
-    // Segments
     for (let i = 0; i < SEGMENTS; i++) {
       const gfx = scene.add.graphics();
       gfx.setPosition(x + i * (SEG_W + SEG_GAP), y + 4);
@@ -34,7 +33,6 @@ export class MeterBar {
       this.segments.push(gfx);
     }
 
-    // Bus listeners (streak is now in HUD, not here)
     this._on('meter:jackpot:updated', (value) => this._onJackpotUpdated(value));
     this._on('meter:jackpot:earned', () => this._onJackpotEarned());
   }
@@ -50,12 +48,12 @@ export class MeterBar {
     gfx.clear();
     gfx.fillStyle(filled ? COLOR.GOLD : COLOR.GREY, 1);
     gfx.lineStyle(1, filled ? COLOR.GOLD : COLOR.BORDER, 1);
-    gfx.fillRoundedRect(0, 0, SEG_W, SEG_H, 6);
-    gfx.strokeRoundedRect(0, 0, SEG_W, SEG_H, 6);
+    gfx.fillRoundedRect(0, 0, SEG_W, SEG_H, 8);
+    gfx.strokeRoundedRect(0, 0, SEG_W, SEG_H, 8);
 
     if (!filled) {
       gfx.lineStyle(1, 0x5A5A7A, 0.3);
-      gfx.strokeRoundedRect(2, 2, SEG_W - 4, SEG_H - 4, 4);
+      gfx.strokeRoundedRect(2, 2, SEG_W - 4, SEG_H - 4, 6);
     }
   }
 

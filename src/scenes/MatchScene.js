@@ -109,14 +109,15 @@ export class MatchScene extends Phaser.Scene {
     hudBar.lineStyle(1, 0x2A2A50, 0.6);
     hudBar.lineBetween(0, L.SAFE_TOP + L.HUD_HEIGHT, L.W, L.SAFE_TOP + L.HUD_HEIGHT);
 
-    const hudY = L.SAFE_TOP + Math.max(Math.round(10 * L.sf), 4);
-    const pillH = Math.max(Math.round(44 * L.sf), 28);
+    const sf = L.sf;
+    const hudY = L.SAFE_TOP + Math.round(12 * sf);
+    const pillH = Math.round(44 * sf);
     const pillR = pillH / 2;
-    const pillW = Math.max(Math.round(200 * L.sf), 100);
-    const hudFontSize = Math.max(Math.round(22 * L.sf), 14);
+    const pillW = Math.round(200 * sf);
+    const hudFontSize = Math.round(24 * sf);
 
     // Position pill
-    const posPillX = Math.round(L.W * 0.03);
+    const posPillX = Math.round(24 * sf);
     const posPill = this.add.graphics();
     posPill.fillStyle(COLOR.BG_MID, 1);
     posPill.lineStyle(1.5, COLOR.BORDER, 1);
@@ -140,7 +141,7 @@ export class MatchScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Streak badge pill (in HUD, center)
-    const streakPillW = Math.max(Math.round(180 * L.sf), 90);
+    const streakPillW = Math.round(180 * sf);
     const streakPillX = L.cx - streakPillW / 2;
     this.streakPill = this.add.graphics();
     this.streakPill.fillStyle(COLOR.BG_MID, 1);
@@ -492,10 +493,10 @@ export class MatchScene extends Phaser.Scene {
     if (!this.streakHudText || !this.streakHudText.active) return;
     this.streakHudText.setText(`🔥 ×${count}`);
 
-    const pillH = Math.max(Math.round(44 * L.sf), 28);
-    const streakPillW = Math.max(Math.round(180 * L.sf), 90);
+    const pillH = Math.round(44 * L.sf);
+    const streakPillW = Math.round(180 * L.sf);
     const streakPillX = L.cx - streakPillW / 2;
-    const hudY = L.SAFE_TOP + Math.max(Math.round(10 * L.sf), 4);
+    const hudY = L.SAFE_TOP + Math.round(12 * L.sf);
 
     if (this.streakPill && this.streakPill.active) {
       this.streakPill.clear();

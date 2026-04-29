@@ -5,10 +5,12 @@ import { MenuScene } from './scenes/MenuScene.js';
 import { MatchScene } from './scenes/MatchScene.js';
 import { ResultsScene } from './scenes/ResultsScene.js';
 
+const dpr = window.devicePixelRatio || 1;
+
 const config = {
   type: Phaser.AUTO,
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: Math.round(window.innerWidth * dpr),
+  height: Math.round(window.innerHeight * dpr),
   parent: 'game-wrapper',
   backgroundColor: '#0D0D1A',
   scale: {
