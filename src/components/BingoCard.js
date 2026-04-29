@@ -5,6 +5,7 @@ import { bus } from '../utils/eventBus.js';
 const CARD_W = CARD_SIZE * CELL_SIZE + (CARD_SIZE - 1) * CELL_GAP;
 const HEADER_COLORS = ['#3498DB', '#9B59B6', '#2ECC71', '#FF8C00', '#E74C3C'];
 const HEADERS = ['B', 'I', 'N', 'G', 'O'];
+const HALF = CELL_SIZE / 2;
 
 export class BingoCard {
   constructor(scene, x, y, cardManager) {
@@ -23,7 +24,7 @@ export class BingoCard {
     // Column headers
     this.headerTexts = [];
     for (let c = 0; c < 5; c++) {
-      const hx = x + c * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2;
+      const hx = x + c * (CELL_SIZE + CELL_GAP) + HALF;
       this.headerTexts.push(
         scene.add.text(hx, y - 20, HEADERS[c], {
           ...FONT.UI, fontSize: '32px', color: HEADER_COLORS[c],
@@ -57,8 +58,9 @@ export class BingoCard {
   }
 
   _makeCell(col, row, number) {
-    const cellX = this.x + col * (CELL_SIZE + CELL_GAP);
-    const cellY = this.y + row * (CELL_SIZE + CELL_GAP) + 20;
+    // Container positioned at cell center — children offset by -HALF
+    const cx = this.x + col * (CELL_SIZE + CELL_GAP) + HALF;
+    const cy = this.y + row * (CELL_SIZE + CELL_GAP) + 20 + HALF;
 
     const bg = this.scene.add.graphics();
     if (number === 0) {
@@ -67,7 +69,7 @@ export class BingoCard {
       this._drawOpen(bg);
     }
 
-    const label = this.scene.add.text(CELL_SIZE / 2, CELL_SIZE / 2,
+    const label = this.scene.add.text(0, 0,
       number === 0 ? '★\nFREE' : String(number),
       {
         ...FONT.NUMBER, fontSize: number === 0 ? '28px' : '36px',
@@ -78,12 +80,8 @@ export class BingoCard {
 
     const overlay = this.scene.add.graphics();
 
-    const container = this.scene.add.container(cellX, cellY, [bg, label, overlay]);
+    const container = this.scene.add.container(cx, cy, [bg, label, overlay]);
     container.setSize(CELL_SIZE, CELL_SIZE);
-    // Set origin to center for proper scale-tween behavior
-    container.setOrigin(0.5, 0.5);
-    // Offset position to account for origin shift
-    container.setPosition(cellX + CELL_SIZE / 2, cellY + CELL_SIZE / 2);
     if (number !== 0) container.setInteractive();
 
     return { container, bg, label, overlay, col, row, number, state: number === 0 ? 'FREE' : 'OPEN' };
@@ -93,24 +91,24 @@ export class BingoCard {
     bg.clear();
     bg.fillStyle(COLOR.BG_LIGHT, 1);
     bg.lineStyle(1.5, COLOR.BORDER, 1);
-    bg.fillRoundedRect(-CELL_SIZE / 2, -CELL_SIZE / 2, CELL_SIZE, CELL_SIZE, 12);
-    bg.strokeRoundedRect(-CELL_SIZE / 2, -CELL_SIZE / 2, CELL_SIZE, CELL_SIZE, 12);
+    bg.fillRoundedRect(-HALF, -HALF, CELL_SIZE, CELL_SIZE, 12);
+    bg.strokeRoundedRect(-HALF, -HALF, CELL_SIZE, CELL_SIZE, 12);
   }
 
   _drawClosed(bg) {
     bg.clear();
     bg.fillStyle(COLOR.GREEN_HIT, 1);
     bg.lineStyle(1.5, COLOR.GREEN_DARK, 1);
-    bg.fillRoundedRect(-CELL_SIZE / 2, -CELL_SIZE / 2, CELL_SIZE, CELL_SIZE, 12);
-    bg.strokeRoundedRect(-CELL_SIZE / 2, -CELL_SIZE / 2, CELL_SIZE, CELL_SIZE, 12);
+    bg.fillRoundedRect(-HALF, -HALF, CELL_SIZE, CELL_SIZE, 12);
+    bg.strokeRoundedRect(-HALF, -HALF, CELL_SIZE, CELL_SIZE, 12);
   }
 
   _drawFree(bg) {
     bg.clear();
     bg.fillStyle(COLOR.GREEN_HIT, 1);
     bg.lineStyle(1.5, COLOR.GREEN_DARK, 1);
-    bg.fillRoundedRect(-CELL_SIZE / 2, -CELL_SIZE / 2, CELL_SIZE, CELL_SIZE, 12);
-    bg.strokeRoundedRect(-CELL_SIZE / 2, -CELL_SIZE / 2, CELL_SIZE, CELL_SIZE, 12);
+    bg.fillRoundedRect(-HALF, -HALF, CELL_SIZE, CELL_SIZE, 12);
+    bg.strokeRoundedRect(-HALF, -HALF, CELL_SIZE, CELL_SIZE, 12);
   }
 
   getCell(col, row) {
@@ -125,7 +123,7 @@ export class BingoCard {
     this._drawClosed(cell.bg);
     cell.label.setColor('#FFFFFF');
 
-    // Scale tween — container has origin 0.5, so scaling works from center
+    // Scale tween from center (container is at center position)
     this.scene.tweens.add({
       targets: cell.container,
       scaleX: 1.2, scaleY: 1.2,
@@ -176,7 +174,7 @@ export class BingoCard {
     }
 
     cell.overlay.lineStyle(lineW, color, 1);
-    cell.overlay.strokeRoundedRect(-CELL_SIZE / 2 + 4, -CELL_SIZE / 2 + 4, CELL_SIZE - 8, CELL_SIZE - 8, 10);
+    cell.overlay.strokeRoundedRect(-HALF + 4, -HALF + 4, CELL_SIZE - 8, CELL_SIZE - 8, 10);
     cell.overlay.setAlpha(0.4);
 
     const tween = this.scene.tweens.add({
