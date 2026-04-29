@@ -39,8 +39,8 @@ export class MeterBar {
   }
 
   _createSegments() {
-    this.jackpotLabel = this.scene.add.text(this.x, this.y - 28, 'JACKPOT', {
-      ...FONT.UI, fontSize: '20px', color: '#FFD700',
+    this.jackpotLabel = this.scene.add.text(this.x, this.y - 32, 'JACKPOT', {
+      ...FONT.UI, fontSize: '28px', color: '#FFD700',
     }).setOrigin(0, 0.5);
 
     for (let i = 0; i < 5; i++) {

@@ -39,19 +39,25 @@ export class BingoCard {
     const cardH = 5 * CELL_SIZE + 4 * CELL_GAP;
     panel.fillStyle(COLOR.BG_MID, 1);
     panel.lineStyle(2, COLOR.BORDER, 1);
-    panel.fillRoundedRect(this.x - 10, this.y - 10, cardW + 20, cardH + 20, 20);
-    panel.strokeRoundedRect(this.x - 10, this.y - 10, cardW + 20, cardH + 20, 20);
+    panel.fillRoundedRect(this.x - 10, this.y - 50, cardW + 20, cardH + 60, 20);
+    panel.strokeRoundedRect(this.x - 10, this.y - 50, cardW + 20, cardH + 60, 20);
     this.panel = panel;
+
+    // Header strip background inside panel
+    const headerBg = this.scene.add.graphics();
+    headerBg.fillStyle(COLOR.BG_DARK, 0.9);
+    headerBg.fillRoundedRect(this.x - 6, this.y - 48, cardW + 12, 46, 10);
+    headerBg.setDepth(5);
 
     const HEADERS = ['B', 'I', 'N', 'G', 'O'];
     const COLORS = ['#3498DB', '#9B59B6', '#2ECC71', '#FF8C00', '#E74C3C'];
     HEADERS.forEach((letter, i) => {
       this.scene.add.text(
         this.x + i * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
-        this.y - 30,
+        this.y - 26,
         letter,
-        { fontFamily: 'Nunito', fontSize: '36px', fontStyle: 'bold', color: COLORS[i] }
-      ).setOrigin(0.5);
+        { fontFamily: 'Nunito', fontSize: '44px', fontStyle: 'bold', color: COLORS[i], stroke: '#000000', strokeThickness: 6 }
+      ).setOrigin(0.5).setDepth(10);
     });
 
     for (let row = 0; row < 5; row++) {
@@ -74,7 +80,7 @@ export class BingoCard {
     const label = this.scene.add.text(
       CELL_SIZE / 2, CELL_SIZE / 2,
       isFree ? '★\nFREE' : String(number),
-      { ...FONT.NUMBER, fontSize: isFree ? '28px' : '36px', color: '#F0F0FF', align: 'center' }
+      { ...FONT.NUMBER, fontSize: isFree ? '32px' : '48px', color: '#F0F0FF', align: 'center' }
     ).setOrigin(0.5);
 
     const overlay = this.scene.add.graphics();

@@ -20,6 +20,7 @@ export class ControlZone {
     // SPIN button
     this.spinBtn = this.scene.add.image(this.x, this.y, 'btn-spin-normal')
       .setOrigin(0.5)
+      .setDisplaySize(280, 105)
       .setInteractive();
     this.spinBtn.on('pointerdown', () => {
       this.spinBtn.setTexture('btn-spin-pressed');
@@ -33,16 +34,18 @@ export class ControlZone {
     });
 
     // JACKPOT button
-    this.jackpotBtn = this.scene.add.image(this.x - 260, this.y + 20, 'btn-jackpot-empty')
+    this.jackpotBtn = this.scene.add.image(this.x - 240, this.y, 'btn-jackpot-empty')
       .setOrigin(0.5)
+      .setDisplaySize(160, 80)
       .setInteractive();
     this.jackpotBtn.on('pointerup', () => {
       if (this.onJackpot) this.onJackpot();
     });
 
     // SPEED button
-    this.speedBtn = this.scene.add.image(this.x + 260, this.y + 20, 'btn-speed-normal')
+    this.speedBtn = this.scene.add.image(this.x + 240, this.y, 'btn-speed-normal')
       .setOrigin(0.5)
+      .setDisplaySize(90, 72)
       .setInteractive();
     this.speedBtn.on('pointerup', () => {
       this.fastMode = !this.fastMode;
@@ -51,7 +54,7 @@ export class ControlZone {
     });
 
     // Wild badge (hidden by default)
-    this.wildBadge = this.scene.add.text(this.x - 340, this.y - 20, '🌟', {
+    this.wildBadge = this.scene.add.text(this.x - 320, this.y - 20, '🌟', {
       fontSize: '28px',
     }).setOrigin(0.5).setVisible(false);
   }

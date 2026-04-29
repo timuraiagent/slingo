@@ -94,7 +94,7 @@ export class SlotMachine {
 
     if (symbolDef.id === 'number') {
       const txt = this.scene.add.text(0, 0, String(label), {
-        ...FONT.NUMBER, fontSize: '36px', color: '#F0F0FF',
+        ...FONT.NUMBER, fontSize: '52px', color: '#F0F0FF',
       }).setOrigin(0.5);
       container.add(txt);
     } else if (symbolDef.id === 'jackpot') {

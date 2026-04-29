@@ -84,7 +84,7 @@ export class MatchScene extends Phaser.Scene {
 
     const cardW = 5 * CELL_SIZE + 4 * CELL_GAP;
     const cardX = (W - cardW) / 2;
-    const cardY = SAFE_TOP + HUD_HEIGHT + 24;
+    const cardY = SAFE_TOP + HUD_HEIGHT + 50;
     const cardBottom = cardY + cardW;
 
     const meterY = cardBottom + 20;
