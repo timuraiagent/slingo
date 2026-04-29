@@ -23,6 +23,7 @@ import { PressureManager } from '../managers/PressureManager.js';
 import { AudioManager } from '../managers/AudioManager.js';
 import { MatchStateMachine, STATES } from '../managers/MatchStateMachine.js';
 import { SYMBOLS } from '../data/symbolDefinitions.js';
+import { HelpDialog } from '../components/HelpDialog.js';
 
 export class MatchScene extends Phaser.Scene {
   constructor() { super('MatchScene'); }
@@ -61,7 +62,9 @@ export class MatchScene extends Phaser.Scene {
     // Components
     this.bingoCard = new BingoCard(this, L.cardX, L.cardY, this.cardManager, L);
     this.meterBar = new MeterBar(this, L.cardX, L.meterY, L);
-    this.bingoCard.revealAnimation();
+    this.bingoCard.revealAnimation(() => {
+      new HelpDialog(this);
+    });
     this.timingBar = new TimingBar(this, L.cx, L.timingY, L);
     this.slotMachine = new SlotMachine(this, L.cx, L.slotY, this.rngManager.getRng(), L);
     this.controlZone = new ControlZone(this, 0, L.controlY, W, L);
@@ -156,6 +159,22 @@ export class MatchScene extends Phaser.Scene {
     this.streakHudText = this.add.text(L.cx, hudY + pillH / 2, '🔥 ×0', {
       ...FONT.UI, fontSize: `${hudFontSize}px`, color: '#FFFFFF',
     }).setOrigin(0.5);
+
+    // Help button (top-right corner)
+    const helpBtnSize = Math.round(72 * sf);
+    const helpBtnX = L.W - Math.round(20 * sf) - helpBtnSize / 2;
+    const helpBtnY = hudY + pillH / 2;
+    const helpBg = this.add.graphics();
+    helpBg.fillStyle(COLOR.BG_MID, 1);
+    helpBg.lineStyle(1.5, COLOR.BORDER, 1);
+    helpBg.fillRoundedRect(helpBtnX - helpBtnSize / 2, helpBtnY - helpBtnSize / 2, helpBtnSize, helpBtnSize, helpBtnSize / 2);
+    helpBg.strokeRoundedRect(helpBtnX - helpBtnSize / 2, helpBtnY - helpBtnSize / 2, helpBtnSize, helpBtnSize, helpBtnSize / 2);
+    const helpText = this.add.text(helpBtnX, helpBtnY, '?', {
+      ...FONT.UI, fontSize: `${Math.round(44 * sf)}px`, color: '#F0F0FF',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    helpText.on('pointerdown', () => {
+      new HelpDialog(this);
+    });
 
     // Update position + timer every 3 seconds
     this.time.addEvent({

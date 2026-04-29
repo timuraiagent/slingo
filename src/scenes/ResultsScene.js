@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { drawBackground, makeTextButton, drawPanel } from '../utils/draw.js';
 import { COLOR, FONT, POSITION_REWARDS } from '../constants.js';
 import { addCoins } from '../utils/storage.js';
+import { HelpDialog } from '../components/HelpDialog.js';
 
 export class ResultsScene extends Phaser.Scene {
   constructor() { super('ResultsScene'); }
@@ -140,12 +141,12 @@ export class ResultsScene extends Phaser.Scene {
       delay: 1400,
     });
 
-    const mainMenu = makeTextButton(this, cx, btnY + Math.round(140 * sf), btnW, btnH, 'MAIN MENU', {
+    const help = makeTextButton(this, cx, btnY + Math.round(140 * sf), btnW, btnH, 'HELP', {
       fontSize: `${Math.round(48 * sf)}px`,
     });
-    mainMenu.setAlpha(0);
+    help.setAlpha(0);
     this.tweens.add({
-      targets: mainMenu,
+      targets: help,
       alpha: 1,
       duration: 300,
       delay: 1500,
@@ -154,8 +155,8 @@ export class ResultsScene extends Phaser.Scene {
     playAgain.on('pointerdown', () => {
       this.scene.start('MatchScene');
     });
-    mainMenu.on('pointerdown', () => {
-      this.scene.start('MatchScene');
+    help.on('pointerdown', () => {
+      new HelpDialog(this);
     });
   }
 
