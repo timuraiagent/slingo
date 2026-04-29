@@ -72,15 +72,17 @@ export class MeterBar {
 
   _createLabels() {
     this.streakBg = this.scene.add.graphics();
-    const sx = this.x + 5 * (SEG_W + SEG_GAP) + 40;
+    const totalW = 5 * (SEG_W + SEG_GAP);
+    const sx = this.x + totalW / 2 - 60;
     this.streakX = sx;
+    this.streakY = this.y + SEG_H + 10;
     this.streakBg.fillStyle(COLOR.BG_LIGHT, 1);
     this.streakBg.lineStyle(1.5, COLOR.BORDER, 1);
-    this.streakBg.fillRoundedRect(sx, this.y, 110, SEG_H, 18);
-    this.streakBg.strokeRoundedRect(sx, this.y, 110, SEG_H, 18);
+    this.streakBg.fillRoundedRect(sx, this.streakY, 120, SEG_H, 18);
+    this.streakBg.strokeRoundedRect(sx, this.streakY, 120, SEG_H, 18);
 
-    this.streakText = this.scene.add.text(sx + 55, this.y + SEG_H / 2, 'STREAK x0', {
-      ...FONT.UI, fontSize: '24px', color: '#FFFFFF',
+    this.streakText = this.scene.add.text(sx + 60, this.streakY + SEG_H / 2, 'STREAK x0', {
+      ...FONT.UI, fontSize: '28px', color: '#FFFFFF',
     }).setOrigin(0.5);
   }
 
@@ -91,7 +93,7 @@ export class MeterBar {
     const border = count >= 3 ? COLOR.ORANGE_HOT : COLOR.BORDER;
     this.streakBg.fillStyle(fill, 1);
     this.streakBg.lineStyle(1.5, border, 1);
-    this.streakBg.fillRoundedRect(this.streakX, this.y, 110, SEG_H, 18);
-    this.streakBg.strokeRoundedRect(this.streakX, this.y, 110, SEG_H, 18);
+    this.streakBg.fillRoundedRect(this.streakX, this.streakY, 120, SEG_H, 18);
+    this.streakBg.strokeRoundedRect(this.streakX, this.streakY, 120, SEG_H, 18);
   }
 }

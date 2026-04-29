@@ -87,7 +87,7 @@ export class MatchScene extends Phaser.Scene {
     const cardY = SAFE_TOP + HUD_HEIGHT + 50;
     const cardBottom = cardY + cardW;
 
-    const meterY = cardBottom + 40;
+    const meterY = cardBottom + 60;
     const timingY = meterY + METER_HEIGHT + 12;
     const slotY = timingY + TIMING_HEIGHT + 12;
     const controlY = slotY + SLOT_HEIGHT + 20;
@@ -113,15 +113,15 @@ export class MatchScene extends Phaser.Scene {
     hudBar.lineBetween(0, SAFE_TOP + HUD_HEIGHT, this.scale.width, SAFE_TOP + HUD_HEIGHT);
 
     this.hudPosBg = this.add.graphics();
-    drawPanel(this.hudPosBg, 40, SAFE_TOP + 16, 280, 72, 32, COLOR.BG_MID, COLOR.BORDER);
-    this.hudPosText = this.add.text(180, SAFE_TOP + 52, '1st / 8', {
-      ...FONT.UI, fontSize: '32px', color: '#F0F0FF',
+    drawPanel(this.hudPosBg, 40, SAFE_TOP + 12, 280, 84, 32, COLOR.BG_MID, COLOR.BORDER);
+    this.hudPosText = this.add.text(180, SAFE_TOP + 54, '1st / 8', {
+      ...FONT.UI, fontSize: '48px', color: '#F0F0FF',
     }).setOrigin(0.5);
 
     this.hudTimeBg = this.add.graphics();
-    drawPanel(this.hudTimeBg, this.scale.width - 320, SAFE_TOP + 16, 280, 72, 32, COLOR.BG_MID, COLOR.BORDER);
-    this.hudTimeText = this.add.text(this.scale.width - 180, SAFE_TOP + 52, '0:00', {
-      ...FONT.UI, fontSize: '32px', color: '#F0F0FF',
+    drawPanel(this.hudTimeBg, this.scale.width - 320, SAFE_TOP + 12, 280, 84, 32, COLOR.BG_MID, COLOR.BORDER);
+    this.hudTimeText = this.add.text(this.scale.width - 180, SAFE_TOP + 54, '0:00', {
+      ...FONT.UI, fontSize: '48px', color: '#F0F0FF',
     }).setOrigin(0.5);
 
     this.hudUpdateEvent = this.time.addEvent({
