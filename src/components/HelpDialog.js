@@ -168,6 +168,7 @@ export class HelpDialog {
     scene.input.on('pointermove', (p) => this._onDragMove(p));
     scene.input.on('pointerup', () => this._dragging = false);
     this._overlay = overlay;
+    this._onClose = opts.onClose || null;
 
     this._autoCloseTimer = null;
     if (this._autoCloseMs > 0) {
@@ -274,5 +275,6 @@ export class HelpDialog {
       if (el && el.destroy) el.destroy();
     });
     this.elements = [];
+    if (this._onClose) this._onClose();
   }
 }

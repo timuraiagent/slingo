@@ -63,7 +63,7 @@ export class MatchScene extends Phaser.Scene {
     this.bingoCard = new BingoCard(this, L.cardX, L.cardY, this.cardManager, L);
     this.meterBar = new MeterBar(this, L.cardX, L.meterY, L);
     this.bingoCard.revealAnimation(() => {
-      new HelpDialog(this);
+      new HelpDialog(this, { onClose: () => this._startCountdown() });
     });
     this.timingBar = new TimingBar(this, L.cx, L.timingY, L);
     this.slotMachine = new SlotMachine(this, L.cx, L.slotY, this.rngManager.getRng(), L);
@@ -71,9 +71,6 @@ export class MatchScene extends Phaser.Scene {
 
     // HUD
     this._buildHUD();
-
-    // Countdown
-    this._startCountdown();
 
     // Spin timer (auto-fire)
     this.spinTimer = null;
