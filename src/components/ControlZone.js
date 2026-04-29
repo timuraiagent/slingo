@@ -77,16 +77,18 @@ export class ControlZone {
     const wildX = (spinRight + speedLeft) / 2;
     const badgeW = Math.round(80 * sf);
     const badgeH = Math.round(80 * sf);
-    this.wildBg = scene.add.graphics().setDepth(5);
-    this.wildBg.fillStyle(0x2A1A00, 1);
-    this.wildBg.fillRoundedRect(wildX - badgeW / 2, btnY - badgeH / 2, badgeW, badgeH, 10);
-    this.wildBg.lineStyle(2, COLOR.GOLD, 1);
-    this.wildBg.strokeRoundedRect(wildX - badgeW / 2, btnY - badgeH / 2, badgeW, badgeH, 10);
-    this.wildBg.setAlpha(0);
+    this._wildX = wildX;
+    this._wildBtnY = btnY;
+    this._wildBadgeW = badgeW;
+    this._wildBadgeH = badgeH;
 
-    this.wildBadge = scene.add.text(wildX, btnY, '🌟', {
+    // Deactivated state: dim border, dim star
+    this.wildBg = scene.add.graphics().setDepth(5);
+    this._drawWildBg(false);
+
+    this.wildBadge = scene.add.text(wildX, btnY, '⭐', {
       fontSize: `${Math.round(50 * sf)}px`,
-    }).setOrigin(0.5).setAlpha(0).setDepth(6).setInteractive({ useHandCursor: true });
+    }).setOrigin(0.5).setAlpha(0.3).setDepth(6);
 
     this.wildBadge.on('pointerdown', () => {
       if (this.hasWildBall && this.onWildBall) this.onWildBall();
@@ -107,6 +109,27 @@ export class ControlZone {
       this._jackpotTween = null;
     }
     this.jackpotBtn.setScale(this._jackpotBaseScaleX, this._jackpotBaseScaleY);
+  }
+
+  _stopWildTween() {
+    if (this._wildTween) {
+      this._wildTween.stop();
+      this._wildTween = null;
+    }
+    this.wildBadge.setScale(1);
+  }
+
+  _drawWildBg(active) {
+    const wildX = this._wildX;
+    const btnY = this._wildBtnY;
+    const badgeW = this._wildBadgeW;
+    const badgeH = this._wildBadgeH;
+    this.wildBg.clear();
+    this.wildBg.fillStyle(active ? 0x2A1A00 : 0x0D0D1A, 1);
+    this.wildBg.fillRoundedRect(wildX - badgeW / 2, btnY - badgeH / 2, badgeW, badgeH, 10);
+    this.wildBg.lineStyle(2, active ? COLOR.GOLD : COLOR.BORDER, active ? 1 : 0.5);
+    this.wildBg.strokeRoundedRect(wildX - badgeW / 2, btnY - badgeH / 2, badgeW, badgeH, 10);
+    this.wildBg.setDepth(5);
   }
 
   setSpinEnabled(enabled) {
@@ -151,24 +174,36 @@ export class ControlZone {
     }
   }
 
-  setWildBadge(visible) {
-    this.hasWildBall = visible;
-    this.wildBadge.setAlpha(visible ? 1 : 0);
-    this.wildBg.setAlpha(visible ? 1 : 0);
-    if (visible) {
-      this.wildBadge.setInteractive({ useHandCursor: true });
+  setWildBadge(active) {
+    this.hasWildBall = active;
+    this._stopWildTween();
+    this._drawWildBg(active);
+
+    if (active) {
+      this.wildBadge.setText('🌟').setAlpha(1).setInteractive({ useHandCursor: true });
+      this._wildTween = this.scene.tweens.add({
+        targets: this.wildBadge,
+        scaleX: 1.15,
+        scaleY: 1.15,
+        duration: 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
     } else {
-      this.wildBadge.disableInteractive();
+      this.wildBadge.setText('⭐').setAlpha(0.3).disableInteractive().setScale(1);
     }
   }
 
   disableAll() {
     this._stopSpinTween();
     this._stopJackpotTween();
+    this._stopWildTween();
     this.spinBtn.disableInteractive().setAlpha(0.4);
     this.jackpotBtn.disableInteractive().setAlpha(0.4);
     this.speedBtn.disableInteractive().setAlpha(0.4);
-    this.wildBadge.disableInteractive().setAlpha(0);
+    this.wildBadge.disableInteractive().setAlpha(0.3).setText('⭐').setScale(1);
+    this._drawWildBg(false);
   }
 
   destroy() {}
