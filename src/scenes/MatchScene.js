@@ -258,12 +258,16 @@ export class MatchScene extends Phaser.Scene {
     const steps = ['3', '2', '1', 'GO!'];
     let step = 0;
 
+    // Initial countdown beep
+    bus.emit('countdown:tick');
+
     const tick = this.time.addEvent({
       delay: 1000,
       repeat: 3,
       callback: () => {
         step++;
         if (step < steps.length) {
+          bus.emit(step < steps.length - 1 ? 'countdown:tick' : 'countdown:go');
           countdownText.setText(steps[step]);
           countdownText.setScale(1.4);
           this.tweens.add({
@@ -330,6 +334,7 @@ export class MatchScene extends Phaser.Scene {
 
   _onSpin() {
     if (!this.stateMachine.isIdle()) return;
+    bus.emit('button:press');
     this.stateMachine.setState(STATES.SPINNING);
 
     // Lock timing bar
@@ -609,6 +614,7 @@ export class MatchScene extends Phaser.Scene {
     if (!this.stateMachine.isIdle()) return;
     if (this.meterManager.jackpotBalls <= 0) return;
 
+    bus.emit('button:press');
     this.stateMachine.setState(STATES.JACKPOT_SELECTING);
     this.jackpotSelecting = true;
     this.controlZone.setSpinEnabled(false);
@@ -930,6 +936,7 @@ export class MatchScene extends Phaser.Scene {
     if (!this.stateMachine.isIdle() || !this.hasWildBall) return;
     const L = this.L;
 
+    bus.emit('button:press');
     this.stateMachine.setState(STATES.JACKPOT_SELECTING);
     this.wildSelecting = true;
     this.controlZone.setSpinEnabled(false);

@@ -43,16 +43,6 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('particle-spark',      'G11.png');
     this.load.image('reel-result-row',     'G12.png');
     this.load.image('popup-jackpot',       'G13.png');
-
-    // Audio
-    const audioKeys = [
-      'reel-spin', 'reel-stop', 'useful-hit', 'near-hit',
-      'jackpot-segment', 'jackpot-earned', 'perfect-timing',
-      'cell-close', 'bingo-win', 'pressure-start',
-    ];
-    audioKeys.forEach((k) => {
-      this.load.audio(k, `audio/${k}.mp3`);
-    });
   }
 
   create() {

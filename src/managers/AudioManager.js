@@ -1,37 +1,102 @@
 import { bus } from '../utils/eventBus.js';
+import { SoundSynth } from '../utils/SoundSynth.js';
 
 export class AudioManager {
   constructor(scene) {
     this.scene = scene;
-    this.sounds = {};
+    this.synth = null;
     this._handlers = [];
   }
 
   init() {
-    const keys = [
-      'reel-spin', 'reel-stop', 'useful-hit', 'near-hit',
-      'jackpot-segment', 'jackpot-earned', 'perfect-timing',
-      'cell-close', 'bingo-win', 'pressure-start',
-    ];
-    keys.forEach(k => {
-      if (this.scene.cache.audio.exists(k)) {
-        this.sounds[k] = this.scene.sound.add(k, { volume: 0.7 });
-      }
-    });
+    const ctx = this.scene.sound.context;
+    if (ctx) {
+      this.synth = new SoundSynth(ctx);
+    }
     this.wireEvents();
   }
 
   wireEvents() {
-    this._on('slot:spinning',         () => this.play('reel-spin'));
-    this._on('reel:stopped',          () => this.play('reel-stop'));
-    this._on('card:useful-hit',       () => this.play('useful-hit'));
-    this._on('card:near-hit',         () => this.play('near-hit'));
-    this._on('meter:jackpot:updated', () => this.play('jackpot-segment'));
-    this._on('meter:jackpot:earned',  () => this.play('jackpot-earned'));
-    this._on('timing:perfect',        () => this.play('perfect-timing'));
-    this._on('card:cell-closed',      () => this.play('cell-close'));
-    this._on('match:bingo',           () => this.play('bingo-win'));
-    this._on('pressure:start',        () => this.play('pressure-start'));
+    this._on('slot:spinning',         () => this._reelSpin());
+    this._on('reel:stopped',          () => this._reelStop());
+    this._on('card:useful-hit',       () => this._usefulHit());
+    this._on('card:near-hit',         () => this._nearHit());
+    this._on('card:cell-closed',      () => this._cellClose());
+    this._on('meter:jackpot:updated', () => this._jackpotSegment());
+    this._on('meter:jackpot:earned',  () => this._jackpotEarned());
+    this._on('timing:perfect',        () => this._perfectTiming());
+    this._on('match:bingo',           () => this._bingoWin());
+    this._on('pressure:start',        () => this._pressureStart());
+    this._on('button:press',          () => this._buttonPress());
+    this._on('countdown:tick',        () => this._countdownTick());
+    this._on('countdown:go',          () => this._countdownGo());
+  }
+
+  _reelSpin() {
+    if (!this.synth) return;
+    this.synth.playSweep(200, 800, 0.2, 'triangle');
+  }
+
+  _reelStop() {
+    if (!this.synth) return;
+    this.synth.playTone(150, 0.06, 'sine', 0.002, 0.04);
+  }
+
+  _usefulHit() {
+    if (!this.synth) return;
+    this.synth.playTone(880, 0.3, 'sine', 0.005, 0.15);
+  }
+
+  _nearHit() {
+    if (!this.synth) return;
+    this.synth.playNoiseSweep(400, 600, 0.15);
+  }
+
+  _cellClose() {
+    if (!this.synth) return;
+    this.synth.playPitchDrop(600, 200, 0.08);
+  }
+
+  _jackpotSegment() {
+    if (!this.synth) return;
+    this.synth.playTone(1000, 0.03, 'square', 0.002, 0.02);
+  }
+
+  _jackpotEarned() {
+    if (!this.synth) return;
+    this.synth.playChord([523, 659, 784], 0.5, 'sine');
+  }
+
+  _perfectTiming() {
+    if (!this.synth) return;
+    this.synth.playTone(1200, 0.4, 'sine', 0.005, 0.2);
+    this.synth.playTone(1800, 0.3, 'sine', 0.01, 0.15);
+  }
+
+  _bingoWin() {
+    if (!this.synth) return;
+    this.synth.playMelody([523, 659, 784, 1047], 0.18, 0.04);
+  }
+
+  _pressureStart() {
+    if (!this.synth) return;
+    this.synth.playTone(80, 0.3, 'sine', 0.01, 0.15);
+    this.synth.playNoise(0.2, 0.01);
+  }
+
+  _buttonPress() {
+    if (!this.synth) return;
+    this.synth.playTone(600, 0.04, 'square', 0.002, 0.03);
+  }
+
+  _countdownTick() {
+    if (!this.synth) return;
+    this.synth.playTone(440, 0.15, 'sine', 0.005, 0.1);
+  }
+
+  _countdownGo() {
+    if (!this.synth) return;
+    this.synth.playTone(880, 0.3, 'sine', 0.005, 0.15);
   }
 
   _on(event, fn, ctx) {
@@ -39,16 +104,9 @@ export class AudioManager {
     this._handlers.push([event, fn, ctx]);
   }
 
-  play(key) {
-    if (this.sounds[key]) {
-      this.sounds[key].play();
-    }
-  }
-
   destroy() {
     this._handlers.forEach(([e, fn, ctx]) => bus.off(e, fn, ctx));
     this._handlers = [];
-    Object.values(this.sounds).forEach(s => s.destroy());
-    this.sounds = {};
+    this.synth = null;
   }
 }
