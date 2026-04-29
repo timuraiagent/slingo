@@ -91,9 +91,9 @@ export class ControlZone {
       this.spinBtn.setInteractive();
       this._spinTween = this.scene.tweens.add({
         targets: this.spinBtn,
-        scaleX: 1.08,
-        scaleY: 1.08,
-        duration: 600,
+        scaleX: 1.03,
+        scaleY: 1.03,
+        duration: 700,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut',
@@ -118,9 +118,9 @@ export class ControlZone {
       this.jackpotBtn.setInteractive();
       this._jackpotTween = this.scene.tweens.add({
         targets: this.jackpotBtn,
-        scaleX: 1.12,
-        scaleY: 1.12,
-        duration: 500,
+        scaleX: 1.05,
+        scaleY: 1.05,
+        duration: 600,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut',
