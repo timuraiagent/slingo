@@ -111,10 +111,10 @@ export class MatchScene extends Phaser.Scene {
 
     const sf = L.sf;
     const hudY = L.SAFE_TOP + Math.round(12 * sf);
-    const pillH = Math.round(72 * sf);
+    const pillH = Math.round(96 * sf);
     const pillR = pillH / 2;
-    const pillW = Math.round(300 * sf);
-    const hudFontSize = Math.round(44 * sf);
+    const pillW = Math.round(320 * sf);
+    const hudFontSize = Math.round(66 * sf);
 
     // Position pill
     const posPillX = Math.round(24 * sf);

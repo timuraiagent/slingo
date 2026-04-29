@@ -43,7 +43,7 @@ export class ResultsScene extends Phaser.Scene {
 
     const ord = this._ordinal(data_.position);
     this.add.text(cx, panelY + Math.round(260 * sf), `${ord} / ${data_.totalPlayers}`, {
-      ...FONT.UI, fontSize: `${Math.round(60 * sf)}px`, color: '#F0F0FF',
+      ...FONT.UI, fontSize: `${Math.round(72 * sf)}px`, color: '#F0F0FF',
     }).setOrigin(0.5);
 
     // Stat rows
@@ -56,19 +56,19 @@ export class ResultsScene extends Phaser.Scene {
     ];
 
     stats.forEach(([icon, label, value], i) => {
-      const sy = statStartY + i * Math.round(100 * sf);
+      const sy = statStartY + i * Math.round(120 * sf);
 
       const row = this.add.container(cx, sy);
       row.setAlpha(0);
 
       const iconTxt = this.add.text(Math.round(-300 * sf), 0, icon, {
-        fontSize: `${Math.round(54 * sf)}px`,
+        fontSize: `${Math.round(64 * sf)}px`,
       }).setOrigin(0, 0.5);
-      const labelTxt = this.add.text(Math.round(-240 * sf), 0, label, {
-        ...FONT.LABEL, fontSize: `${Math.round(39 * sf)}px`, color: '#A0A0C0',
+      const labelTxt = this.add.text(Math.round(-230 * sf), 0, label, {
+        ...FONT.LABEL, fontSize: `${Math.round(48 * sf)}px`, color: '#A0A0C0',
       }).setOrigin(0, 0.5);
       const valueTxt = this.add.text(Math.round(300 * sf), 0, String(value), {
-        ...FONT.UI, fontSize: `${Math.round(45 * sf)}px`, color: '#F0F0FF',
+        ...FONT.UI, fontSize: `${Math.round(54 * sf)}px`, color: '#F0F0FF',
       }).setOrigin(1, 0.5);
 
       row.add([iconTxt, labelTxt, valueTxt]);
@@ -103,7 +103,7 @@ export class ResultsScene extends Phaser.Scene {
     const playAgain = makeTextButton(this, cx, btnY, btnW, btnH, 'PLAY AGAIN', {
       fontSize: `${Math.round(48 * sf)}px`,
     });
-    const mainMenu = makeTextButton(this, cx, btnY + Math.round(130 * sf), btnW, btnH, 'MAIN MENU', {
+    const mainMenu = makeTextButton(this, cx, btnY + Math.round(160 * sf), btnW, btnH, 'MAIN MENU', {
       fontSize: `${Math.round(48 * sf)}px`,
     });
 
