@@ -43,8 +43,15 @@ export class TimingBar {
     this.barX = x - BAR_W / 2;
     this.barY = y;
 
-    // Draw zones
+    // Draw zones clipped to pill shape
     this.barGfx = scene.add.graphics();
+    const radius = BAR_H / 2;
+
+    // Fill rounded pill background first (acts as clip via layering)
+    this.barGfx.fillStyle(COLOR.GREY, 1);
+    this.barGfx.fillRoundedRect(this.barX, this.barY, BAR_W, BAR_H, radius);
+
+    // Overwrite with zone colors using fillRect (will be masked by a geometry mask)
     let xCursor = this.barX;
     ZONES.forEach(z => {
       const zW = BAR_W * z.pct;
@@ -52,9 +59,20 @@ export class TimingBar {
       this.barGfx.fillRect(xCursor, this.barY, zW, BAR_H);
       xCursor += zW;
     });
+
+    // Clip the zone fills to the pill shape using a geometry mask
+    const maskGfx = scene.add.graphics();
+    maskGfx.fillStyle(0xFFFFFF, 1);
+    maskGfx.fillRoundedRect(this.barX, this.barY, BAR_W, BAR_H, radius);
+    maskGfx.setAlpha(0);
+    const barMask = maskGfx.createGeometryMask();
+    this.barGfx.setMask(barMask);
+
     // Rounded pill border overlay
-    this.barGfx.lineStyle(2, COLOR.BORDER, 1);
-    this.barGfx.strokeRoundedRect(this.barX, this.barY, BAR_W, BAR_H, BAR_H / 2);
+    const borderGfx = scene.add.graphics();
+    borderGfx.lineStyle(2, COLOR.BORDER, 1);
+    borderGfx.strokeRoundedRect(this.barX, this.barY, BAR_W, BAR_H, radius);
+    borderGfx.setDepth(4);
 
     // Marker
     this.marker = scene.add.graphics();
