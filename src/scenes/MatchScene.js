@@ -195,6 +195,7 @@ export class MatchScene extends Phaser.Scene {
               this.stateMachine.setState(STATE.IDLE);
               this.controlZone.enableAll();
               this.timingBar.activate(this.controlZone.fastMode);
+              this._addAutoFire();
             },
           });
           this.countdownEvent.remove();
@@ -234,10 +235,9 @@ export class MatchScene extends Phaser.Scene {
     if (!timing) {
       this.stateMachine.setState(STATE.IDLE);
       this.controlZone.enableAll();
+      this._addAutoFire();
       return;
     }
-
-    this._addAutoFire();
 
     const primaryNumber = this.rngManager.getSpinNumber(this.cardManager, timing.zone);
     const results = this._buildResults(primaryNumber);
@@ -348,6 +348,7 @@ export class MatchScene extends Phaser.Scene {
     this.controlZone.enableAll();
     this.timingBar.reset();
     this.timingBar.activate(this.controlZone.fastMode);
+    this._addAutoFire();
   }
 
   _recordDebug(zone, hit) {
@@ -410,6 +411,7 @@ export class MatchScene extends Phaser.Scene {
     }
     this.stateMachine.setState(STATE.IDLE);
     this.controlZone.enableAll();
+    this._addAutoFire();
   }
 
   _cancelJackpot() {
@@ -425,6 +427,7 @@ export class MatchScene extends Phaser.Scene {
     });
     this.stateMachine.setState(STATE.IDLE);
     this.controlZone.enableAll();
+    this._addAutoFire();
   }
 
   _onSpeedToggle(fast) {
