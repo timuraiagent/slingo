@@ -70,10 +70,19 @@ export class ControlZone {
       if (this.onSpeedToggle) this.onSpeedToggle(this.fastMode);
     });
 
-    // Wild ball indicator — centered between JACKPOT and SPIN buttons
-    const wildX = (jackpotX + spinX) / 2;
+    // Wild ball indicator — golden rectangle between SPIN and SPEED buttons
+    const wildX = (spinX + speedX) / 2;
+    const badgeW = Math.round(80 * sf);
+    const badgeH = Math.round(80 * sf);
+    this.wildBg = scene.add.graphics().setDepth(5);
+    this.wildBg.fillStyle(0x2A1A00, 1);
+    this.wildBg.fillRoundedRect(wildX - badgeW / 2, btnY - badgeH / 2, badgeW, badgeH, 10);
+    this.wildBg.lineStyle(2, COLOR.GOLD, 1);
+    this.wildBg.strokeRoundedRect(wildX - badgeW / 2, btnY - badgeH / 2, badgeW, badgeH, 10);
+    this.wildBg.setAlpha(0);
+
     this.wildBadge = scene.add.text(wildX, btnY, '🌟', {
-      fontSize: `${Math.round(70 * sf)}px`,
+      fontSize: `${Math.round(50 * sf)}px`,
     }).setOrigin(0.5).setAlpha(0).setDepth(6).setInteractive({ useHandCursor: true });
 
     this.wildBadge.on('pointerdown', () => {
@@ -142,6 +151,7 @@ export class ControlZone {
   setWildBadge(visible) {
     this.hasWildBall = visible;
     this.wildBadge.setAlpha(visible ? 1 : 0);
+    this.wildBg.setAlpha(visible ? 1 : 0);
     if (visible) {
       this.wildBadge.setInteractive({ useHandCursor: true });
     } else {
