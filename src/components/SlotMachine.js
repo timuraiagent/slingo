@@ -41,10 +41,19 @@ export class SlotMachine {
       reelBg.fillRect(rx, ry, REEL_W, REEL_H);
     }
 
-    const paylineY = this.y + 20 + REEL_H / 2;
+    // Middle row highlight (subtle gold tint)
+    const rowTop = this.y + 20 + REEL_H / 2 - SYMBOL_H / 2;
+    this.rowHighlight = this.scene.add.graphics();
+    this.rowHighlight.fillStyle(COLOR.GOLD, 0.12);
+    this.rowHighlight.fillRect(this.x + 16, rowTop, SLOT_W - 32, SYMBOL_H);
+
+    // Gold payline bars above and below middle row
+    const barY1 = this.y + 20 + REEL_H / 2 - SYMBOL_H / 2 - SYMBOL_GAP / 2;
+    const barY2 = this.y + 20 + REEL_H / 2 + SYMBOL_H / 2 + SYMBOL_GAP / 2;
     this.payline = this.scene.add.graphics();
-    this.payline.lineStyle(2, COLOR.GOLD, 0.9);
-    this.payline.lineBetween(this.x + 16, paylineY, this.x + SLOT_W - 16, paylineY);
+    this.payline.lineStyle(4, COLOR.GOLD, 1);
+    this.payline.lineBetween(this.x + 12, barY1, this.x + SLOT_W - 12, barY1);
+    this.payline.lineBetween(this.x + 12, barY2, this.x + SLOT_W - 12, barY2);
   }
 
   _createReels() {
@@ -185,5 +194,6 @@ export class SlotMachine {
     this.masks.forEach(m => m.destroy());
     this.masks = [];
     if (this.payline) this.payline.destroy();
+    if (this.rowHighlight) this.rowHighlight.destroy();
   }
 }

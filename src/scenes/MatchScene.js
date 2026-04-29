@@ -87,7 +87,7 @@ export class MatchScene extends Phaser.Scene {
     const cardY = SAFE_TOP + HUD_HEIGHT + 50;
     const cardBottom = cardY + cardW;
 
-    const meterY = cardBottom + 20;
+    const meterY = cardBottom + 40;
     const timingY = meterY + METER_HEIGHT + 12;
     const slotY = timingY + TIMING_HEIGHT + 12;
     const controlY = slotY + SLOT_HEIGHT + 20;
@@ -96,7 +96,7 @@ export class MatchScene extends Phaser.Scene {
     this.meterBar = new MeterBar(this, cardX, meterY);
     this.timingBar = new TimingBar(this, (W - 960) / 2, timingY + 20);
     this.slotMachine = new SlotMachine(this, (W - SLOT_W) / 2, slotY);
-    this.controlZone = new ControlZone(this, W / 2, controlY + 40,
+    this.controlZone = new ControlZone(this, W / 2, controlY + 40, W,
       () => this._onSpinTap(),
       () => this._onJackpotTap(),
       (fast) => this._onSpeedToggle(fast)
@@ -113,15 +113,15 @@ export class MatchScene extends Phaser.Scene {
     hudBar.lineBetween(0, SAFE_TOP + HUD_HEIGHT, this.scale.width, SAFE_TOP + HUD_HEIGHT);
 
     this.hudPosBg = this.add.graphics();
-    drawPanel(this.hudPosBg, 40, SAFE_TOP + 20, 280, 64, 32, COLOR.BG_MID, COLOR.BORDER);
+    drawPanel(this.hudPosBg, 40, SAFE_TOP + 16, 280, 72, 32, COLOR.BG_MID, COLOR.BORDER);
     this.hudPosText = this.add.text(180, SAFE_TOP + 52, '1st / 8', {
-      ...FONT.UI, fontSize: '26px', color: '#F0F0FF',
+      ...FONT.UI, fontSize: '32px', color: '#F0F0FF',
     }).setOrigin(0.5);
 
     this.hudTimeBg = this.add.graphics();
-    drawPanel(this.hudTimeBg, this.scale.width - 320, SAFE_TOP + 20, 280, 64, 32, COLOR.BG_MID, COLOR.BORDER);
+    drawPanel(this.hudTimeBg, this.scale.width - 320, SAFE_TOP + 16, 280, 72, 32, COLOR.BG_MID, COLOR.BORDER);
     this.hudTimeText = this.add.text(this.scale.width - 180, SAFE_TOP + 52, '0:00', {
-      ...FONT.UI, fontSize: '26px', color: '#F0F0FF',
+      ...FONT.UI, fontSize: '32px', color: '#F0F0FF',
     }).setOrigin(0.5);
 
     this.hudUpdateEvent = this.time.addEvent({

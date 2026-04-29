@@ -55,8 +55,8 @@ export class MeterBar {
       gfx.clear();
       const xPos = this.x + i * (SEG_W + SEG_GAP);
       const filled = i < filledCount;
-      gfx.fillStyle(filled ? COLOR.GOLD : 0x2A2A40, 1);
-      gfx.lineStyle(1, filled ? COLOR.GOLD : COLOR.BORDER, 1);
+      gfx.fillStyle(filled ? COLOR.GOLD : COLOR.BG_LIGHT, 1);
+      gfx.lineStyle(2, filled ? COLOR.GOLD : COLOR.BORDER, 1);
       gfx.fillRoundedRect(xPos, this.y, SEG_W, SEG_H, 8);
       gfx.strokeRoundedRect(xPos, this.y, SEG_W, SEG_H, 8);
     });
@@ -76,22 +76,22 @@ export class MeterBar {
     this.streakX = sx;
     this.streakBg.fillStyle(COLOR.BG_LIGHT, 1);
     this.streakBg.lineStyle(1.5, COLOR.BORDER, 1);
-    this.streakBg.fillRoundedRect(sx, this.y, 120, SEG_H, 18);
-    this.streakBg.strokeRoundedRect(sx, this.y, 120, SEG_H, 18);
+    this.streakBg.fillRoundedRect(sx, this.y, 110, SEG_H, 18);
+    this.streakBg.strokeRoundedRect(sx, this.y, 110, SEG_H, 18);
 
-    this.streakText = this.scene.add.text(sx + 60, this.y + SEG_H / 2, '🔥 ×0', {
-      ...FONT.UI, fontSize: '22px', color: '#FFFFFF',
+    this.streakText = this.scene.add.text(sx + 55, this.y + SEG_H / 2, 'STREAK x0', {
+      ...FONT.UI, fontSize: '18px', color: '#FFFFFF',
     }).setOrigin(0.5);
   }
 
   _updateStreak(count) {
-    this.streakText.setText(`🔥 ×${count}`);
+    this.streakText.setText(`STREAK x${count}`);
     this.streakBg.clear();
     const fill = count >= 3 ? COLOR.ORANGE_HOT : COLOR.BG_LIGHT;
     const border = count >= 3 ? COLOR.ORANGE_HOT : COLOR.BORDER;
     this.streakBg.fillStyle(fill, 1);
     this.streakBg.lineStyle(1.5, border, 1);
-    this.streakBg.fillRoundedRect(this.streakX, this.y, 120, SEG_H, 18);
-    this.streakBg.strokeRoundedRect(this.streakX, this.y, 120, SEG_H, 18);
+    this.streakBg.fillRoundedRect(this.streakX, this.y, 110, SEG_H, 18);
+    this.streakBg.strokeRoundedRect(this.streakX, this.y, 110, SEG_H, 18);
   }
 }

@@ -2,10 +2,11 @@ import Phaser from 'phaser';
 import { bus } from '../utils/eventBus.js';
 
 export class ControlZone {
-  constructor(scene, x, y, onSpin, onJackpot, onSpeed) {
+  constructor(scene, x, y, width, onSpin, onJackpot, onSpeed) {
     this.scene = scene;
     this.x = x;
     this.y = y;
+    this.width = width || 1080;
     this.onSpin = onSpin;
     this.onJackpot = onJackpot;
     this.onSpeed = onSpeed;
@@ -17,8 +18,13 @@ export class ControlZone {
   }
 
   _createButtons() {
+    const halfW = this.width / 2;
+    const jackpotX = this.x - halfW + 120;
+    const spinX = this.x;
+    const speedX = this.x + halfW - 120;
+
     // SPIN button
-    this.spinBtn = this.scene.add.image(this.x, this.y, 'btn-spin-normal')
+    this.spinBtn = this.scene.add.image(spinX, this.y, 'btn-spin-normal')
       .setOrigin(0.5)
       .setDisplaySize(280, 105)
       .setInteractive();
@@ -34,7 +40,7 @@ export class ControlZone {
     });
 
     // JACKPOT button
-    this.jackpotBtn = this.scene.add.image(this.x - 240, this.y, 'btn-jackpot-empty')
+    this.jackpotBtn = this.scene.add.image(jackpotX, this.y, 'btn-jackpot-empty')
       .setOrigin(0.5)
       .setDisplaySize(160, 80)
       .setInteractive();
@@ -43,7 +49,7 @@ export class ControlZone {
     });
 
     // SPEED button
-    this.speedBtn = this.scene.add.image(this.x + 240, this.y, 'btn-speed-normal')
+    this.speedBtn = this.scene.add.image(speedX, this.y, 'btn-speed-normal')
       .setOrigin(0.5)
       .setDisplaySize(90, 72)
       .setInteractive();
@@ -54,7 +60,7 @@ export class ControlZone {
     });
 
     // Wild badge (hidden by default)
-    this.wildBadge = this.scene.add.text(this.x - 320, this.y - 20, '🌟', {
+    this.wildBadge = this.scene.add.text(jackpotX - 60, this.y - 20, '🌟', {
       fontSize: '28px',
     }).setOrigin(0.5).setVisible(false);
   }
