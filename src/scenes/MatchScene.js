@@ -19,8 +19,8 @@ import { TimingBar } from '../components/TimingBar.js';
 import { MeterBar } from '../components/MeterBar.js';
 import { ControlZone } from '../components/ControlZone.js';
 import {
-  COLOR, FONT, BASE_W, SAFE_TOP, SAFE_BOTTOM,
-  HUD_HEIGHT, CELL_SIZE, CELL_GAP, CONTROL_HEIGHT,
+  COLOR, FONT, BASE_W, SAFE_TOP,
+  HUD_HEIGHT, CELL_SIZE, CELL_GAP,
   SLOT_HEIGHT, TIMING_HEIGHT, METER_HEIGHT, COLUMN_RANGES,
 } from '../constants.js';
 
@@ -82,20 +82,21 @@ export class MatchScene extends Phaser.Scene {
     const W = this.scale.width;
     const H = this.scale.height;
 
-    const controlY = H - SAFE_BOTTOM - CONTROL_HEIGHT + 40;
-    const slotY = controlY - SLOT_HEIGHT - 24;
-    const timingY = slotY - TIMING_HEIGHT + 20;
-    const meterY = timingY - METER_HEIGHT - 16;
-
     const cardW = 5 * CELL_SIZE + 4 * CELL_GAP;
     const cardX = (W - cardW) / 2;
-    const cardY = SAFE_TOP + HUD_HEIGHT + 40;
+    const cardY = SAFE_TOP + HUD_HEIGHT + 24;
+    const cardBottom = cardY + cardW;
+
+    const meterY = cardBottom + 20;
+    const timingY = meterY + METER_HEIGHT + 12;
+    const slotY = timingY + TIMING_HEIGHT + 12;
+    const controlY = slotY + SLOT_HEIGHT + 20;
 
     this.bingoCard = new BingoCard(this, cardX, cardY, this.cardManager);
     this.meterBar = new MeterBar(this, cardX, meterY);
     this.timingBar = new TimingBar(this, (W - 960) / 2, timingY + 20);
     this.slotMachine = new SlotMachine(this, (W - SLOT_W) / 2, slotY);
-    this.controlZone = new ControlZone(this, W / 2, controlY + 60,
+    this.controlZone = new ControlZone(this, W / 2, controlY + 40,
       () => this._onSpinTap(),
       () => this._onJackpotTap(),
       (fast) => this._onSpeedToggle(fast)
