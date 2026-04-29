@@ -21,7 +21,7 @@ export class HelpDialog {
 
     // Panel — shorter, fits most content without scrolling
     const panelW = Math.min(Math.round(900 * sf), W - 40);
-    const panelH = Math.round(1560 * sf);
+    const panelH = Math.round(1700 * sf);
     const panelX = (W - panelW) / 2;
     const panelY = Math.round(80 * sf);
 
@@ -94,10 +94,10 @@ export class HelpDialog {
     zones.forEach(([label, desc, color]) => {
       const row = this.scene.add.container(0, y);
       const lbl = this.scene.add.text(-halfW + pad, 0, label, {
-        ...FONT.UI, fontSize: `${Math.round(30 * sf)}px`, color,
+        ...FONT.UI, fontSize: `${Math.round(34 * sf)}px`, color,
       }).setOrigin(0, 0);
-      const dsc = this.scene.add.text(-halfW + pad + Math.round(180 * sf), 0, desc, {
-        ...FONT.LABEL, fontSize: `${Math.round(28 * sf)}px`, color: '#A0A0C0',
+      const dsc = this.scene.add.text(-halfW + pad + Math.round(200 * sf), 0, desc, {
+        ...FONT.LABEL, fontSize: `${Math.round(32 * sf)}px`, color: '#A0A0C0',
       }).setOrigin(0, 0);
       row.add([lbl, dsc]);
       this.content.add(row);
@@ -111,12 +111,12 @@ export class HelpDialog {
     // Jackpot meter — compact
     y = this._addSectionHeader('JACKPOT METER', 0, y);
     const meterNote = this._addText('Fill 5 segments → earn a jackpot ball', 0, y, {
-      ...FONT.LABEL, fontSize: `${Math.round(28 * sf)}px`, color: '#A0A0C0',
+      ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#A0A0C0',
       wordWrap: { width: panelW - pad * 2 },
     });
     y = meterNote.y + meterNote.height + Math.round(6 * sf);
     const jackpotNote = this._addText('★ = +30 charge  |  Jackpot ball closes ANY cell', 0, y, {
-      ...FONT.LABEL, fontSize: `${Math.round(28 * sf)}px`, color: '#FFD700',
+      ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#FFD700',
       wordWrap: { width: panelW - pad * 2 },
     });
     y = jackpotNote.y + jackpotNote.height + Math.round(10 * sf);
@@ -136,10 +136,10 @@ export class HelpDialog {
         ...FONT.UI, fontSize: `${Math.round(34 * sf)}px`, color: s.color,
       }).setOrigin(0, 0);
       const name = this.scene.add.text(-halfW + pad + Math.round(60 * sf), 0, s.name, {
-        ...FONT.UI, fontSize: `${Math.round(28 * sf)}px`, color: '#F0F0FF',
+        ...FONT.UI, fontSize: `${Math.round(32 * sf)}px`, color: '#F0F0FF',
       }).setOrigin(0, 0);
-      const desc = this.scene.add.text(-halfW + pad + Math.round(190 * sf), 0, s.desc, {
-        ...FONT.LABEL, fontSize: `${Math.round(26 * sf)}px`, color: '#A0A0C0',
+      const desc = this.scene.add.text(-halfW + pad + Math.round(210 * sf), 0, s.desc, {
+        ...FONT.LABEL, fontSize: `${Math.round(32 * sf)}px`, color: '#A0A0C0',
       }).setOrigin(0, 0);
       row.add([sym, name, desc]);
       this.content.add(row);
@@ -204,7 +204,7 @@ export class HelpDialog {
     const pad = Math.round(28 * sf);
     lines.forEach(line => {
       const t = this.scene.add.text(0, y, line, {
-        ...FONT.LABEL, fontSize: `${Math.round(28 * sf)}px`, color: '#C0C0E0',
+        ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#C0C0E0',
         wordWrap: { width: (halfW - pad) * 2 },
       }).setOrigin(0.5, 0);
       t.setDepth(57);
