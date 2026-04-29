@@ -27,12 +27,13 @@ export class TimingBar {
     this.timingManager = new TimingManager();
     this.active = false;
     this.locked = false;
-    this.markerTween = null;
     this.baseDuration = 3000;
+    this._elapsed = 0;
+    this._fastMode = false;
 
     const BAR_W = Math.round(Math.min(L.W - 60, 960 * L.sf));
     const BAR_H = L.TIMING_HEIGHT;
-    const MARKER_H = BAR_H + Math.round(16 * L.sf);
+    const MARKER_H = BAR_H + Math.round(20 * L.sf);
 
     this.BAR_W = BAR_W;
     this.BAR_H = BAR_H;
@@ -57,42 +58,29 @@ export class TimingBar {
     // Marker
     this.marker = scene.add.graphics();
     this.marker.fillStyle(COLOR.WHITE, 1);
-    const markerW = Math.round(16 * L.sf);
+    const markerW = Math.round(20 * L.sf);
     this.marker.fillRoundedRect(-markerW / 2, -MARKER_H / 2, markerW, MARKER_H, markerW / 2);
     this.marker.setPosition(this.barX, this.barY + BAR_H / 2);
     this.marker.setDepth(5);
 
     // Zone label
     this.zoneLabel = scene.add.text(0, 0, '', {
-      ...FONT.UI, fontSize: `${Math.round(BAR_H * 0.4)}px`, color: '#FFD700',
-      stroke: '#0D0D1A', strokeThickness: 3,
+      ...FONT.UI, fontSize: `${Math.round(BAR_H * 0.5)}px`, color: '#FFD700',
+      stroke: '#0D0D1A', strokeThickness: 4,
     }).setOrigin(0.5).setAlpha(0).setDepth(6);
   }
 
   activate(fastMode = false) {
     this.active = true;
     this.locked = false;
-    const duration = fastMode ? this.baseDuration / 2 : this.baseDuration;
-
+    this._fastMode = fastMode;
+    this._elapsed = 0;
     this.marker.setPosition(this.barX, this.barY + this.BAR_H / 2);
-
-    this.markerTween = this.scene.tweens.add({
-      targets: this.marker,
-      x: { from: this.barX, to: this.barX + this.BAR_W },
-      duration,
-      ease: 'Linear',
-      repeat: -1,
-    });
   }
 
   lock() {
     if (!this.active || this.locked) return null;
     this.locked = true;
-
-    if (this.markerTween) {
-      this.markerTween.stop();
-      this.markerTween = null;
-    }
 
     const position = (this.marker.x - this.barX) / this.BAR_W;
     const clampedPos = Phaser.Math.Clamp(position, 0, 1);
@@ -100,7 +88,7 @@ export class TimingBar {
 
     const [label, color] = ZONE_LABELS[zone];
     this.zoneLabel.setText(label).setColor(color);
-    this.zoneLabel.setPosition(this.marker.x, this.barY - this.BAR_H * 0.35);
+    this.zoneLabel.setPosition(this.marker.x, this.barY - this.BAR_H * 0.4);
     this.zoneLabel.setAlpha(1);
 
     this.scene.tweens.add({
@@ -121,35 +109,37 @@ export class TimingBar {
   reset() {
     this.active = false;
     this.locked = false;
-    if (this.markerTween) {
-      this.markerTween.stop();
-      this.markerTween = null;
-    }
+    this._elapsed = 0;
     this.marker.setPosition(this.barX, this.barY + this.BAR_H / 2);
   }
 
   setSpeed(fastMode) {
-    if (this.markerTween && this.active && !this.locked) {
-      this.markerTween.stop();
-      const duration = fastMode ? this.baseDuration / 2 : this.baseDuration;
-      this.marker.x = this.barX;
-      this.markerTween = this.scene.tweens.add({
-        targets: this.marker,
-        x: { from: this.barX, to: this.barX + this.BAR_W },
-        duration,
-        ease: 'Linear',
-        repeat: -1,
-      });
+    this._fastMode = fastMode;
+  }
+
+  update(delta) {
+    if (!this.active || this.locked) return;
+
+    this._elapsed += delta;
+    const duration = this._fastMode ? this.baseDuration / 2 : this.baseDuration;
+    const cycleTime = this._elapsed % (duration * 2);
+
+    let position;
+    if (cycleTime < duration) {
+      position = cycleTime / duration;
+    } else {
+      position = 1 - (cycleTime - duration) / duration;
     }
+
+    this.marker.setPosition(
+      this.barX + position * this.BAR_W,
+      this.barY + this.BAR_H / 2
+    );
   }
 
   deactivate() {
     this.reset();
   }
 
-  destroy() {
-    if (this.markerTween) {
-      this.markerTween.stop();
-    }
-  }
+  destroy() {}
 }

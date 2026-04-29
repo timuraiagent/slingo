@@ -111,10 +111,10 @@ export class MatchScene extends Phaser.Scene {
 
     const sf = L.sf;
     const hudY = L.SAFE_TOP + Math.round(12 * sf);
-    const pillH = Math.round(44 * sf);
+    const pillH = Math.round(72 * sf);
     const pillR = pillH / 2;
-    const pillW = Math.round(200 * sf);
-    const hudFontSize = Math.round(24 * sf);
+    const pillW = Math.round(300 * sf);
+    const hudFontSize = Math.round(44 * sf);
 
     // Position pill
     const posPillX = Math.round(24 * sf);
@@ -141,7 +141,7 @@ export class MatchScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Streak badge pill (in HUD, center)
-    const streakPillW = Math.round(180 * sf);
+    const streakPillW = Math.round(260 * sf);
     const streakPillX = L.cx - streakPillW / 2;
     this.streakPill = this.add.graphics();
     this.streakPill.fillStyle(COLOR.BG_MID, 1);
@@ -354,7 +354,7 @@ export class MatchScene extends Phaser.Scene {
     }
 
     // Build reel results
-    const results = this._buildResults(number);
+    const results = this._buildReelResults(number);
 
     // Spin slot machine
     this.slotMachine.spin(results);
@@ -363,7 +363,7 @@ export class MatchScene extends Phaser.Scene {
     this._pendingResult = { number, zone, results };
   }
 
-  _buildResults(primaryNumber) {
+  _buildReelResults(primaryNumber) {
     const resultReelIndex = getColumnForNumber(primaryNumber);
     const results = [];
     const ranges = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
@@ -508,8 +508,8 @@ export class MatchScene extends Phaser.Scene {
     if (!this.streakHudText || !this.streakHudText.active) return;
     this.streakHudText.setText(`🔥 ×${count}`);
 
-    const pillH = Math.round(44 * L.sf);
-    const streakPillW = Math.round(180 * L.sf);
+    const pillH = Math.round(72 * L.sf);
+    const streakPillW = Math.round(260 * L.sf);
     const streakPillX = L.cx - streakPillW / 2;
     const hudY = L.SAFE_TOP + Math.round(12 * L.sf);
 
@@ -713,12 +713,12 @@ export class MatchScene extends Phaser.Scene {
     if (winner === 'player') {
       this._showBingoAnimation(() => {
         this.stateMachine.setState(STATES.RESULTS_PENDING);
-        this.scene.start('ResultsScene', this._buildResults());
+        this.scene.start('ResultsScene', this._buildMatchResults());
       });
     } else {
       this._showBotWinNotice(bot ? bot.name : 'Bot', () => {
         this.stateMachine.setState(STATES.RESULTS_PENDING);
-        this.scene.start('ResultsScene', this._buildResults());
+        this.scene.start('ResultsScene', this._buildMatchResults());
       });
     }
   }
@@ -803,7 +803,7 @@ export class MatchScene extends Phaser.Scene {
     });
   }
 
-  _buildResults() {
+  _buildMatchResults() {
     const position = this.leaderboardManager.getPosition();
     return {
       position,
@@ -899,6 +899,10 @@ export class MatchScene extends Phaser.Scene {
       this.input.off('pointerdown', this._wildTapHandler);
       this._wildTapHandler = null;
     }
+  }
+
+  update(time, delta) {
+    if (this.timingBar) this.timingBar.update(delta);
   }
 
   _buildOrientationBlocker() {

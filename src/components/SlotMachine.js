@@ -24,6 +24,8 @@ export class SlotMachine {
     const PADDING = Math.floor(Math.min(40 * L.sf, (L.W - REEL_COUNT * REEL_W - (REEL_COUNT - 1) * REEL_GAP) / 2));
     const SLOT_W = REEL_COUNT * REEL_W + (REEL_COUNT - 1) * REEL_GAP + PADDING * 2;
     const SLOT_H = REEL_H;
+    const CLIP_TOP = 10;
+    const CLIP_BOT = 10;
 
     this.SYMBOL_W = SYMBOL_W;
     this.SYMBOL_H = SYMBOL_H;
@@ -39,33 +41,33 @@ export class SlotMachine {
     this.slotX = slotX;
     this.slotY = slotY;
 
-    // Outer frame with visible border
+    // Outer frame background
     this.frame = scene.add.graphics();
     this.frame.fillStyle(COLOR.BG_DARK, 1);
-    this.frame.lineStyle(3, COLOR.BORDER, 1);
     this.frame.fillRoundedRect(slotX, slotY, SLOT_W, SLOT_H, 24);
-    this.frame.strokeRoundedRect(slotX, slotY, SLOT_W, SLOT_H, 24);
 
-    // Per-reel backgrounds + masks
+    // Per-reel backgrounds + masks + strips
     const innerX = slotX + PADDING;
 
     for (let i = 0; i < REEL_COUNT; i++) {
       const reelX = innerX + i * (REEL_W + REEL_GAP);
 
-      // Reel bg — visible dark background behind symbols
+      // Reel bg
       const rbg = scene.add.graphics();
       rbg.fillStyle(0x13131F, 1);
       rbg.lineStyle(1, 0x2A2A50, 1);
-      rbg.fillRect(reelX, slotY + 10, REEL_W, SLOT_H - 20);
-      rbg.strokeRect(reelX, slotY + 10, REEL_W, SLOT_H - 20);
+      rbg.fillRect(reelX, slotY + CLIP_TOP, REEL_W, SLOT_H - CLIP_TOP - CLIP_BOT);
+      rbg.strokeRect(reelX, slotY + CLIP_TOP, REEL_W, SLOT_H - CLIP_TOP - CLIP_BOT);
 
-      // Mask for the reel area
-      const maskGfx = scene.make.graphics();
-      maskGfx.fillRect(reelX, slotY + 10, REEL_W, SLOT_H - 20);
+      // Geometry mask — positioned at strip location, drawn in local coords
+      const maskGfx = scene.add.graphics();
+      maskGfx.setPosition(reelX + REEL_W / 2, slotY + CLIP_TOP);
+      maskGfx.setAlpha(0);
+      maskGfx.fillRect(-REEL_W / 2, 0, REEL_W, SLOT_H - CLIP_TOP - CLIP_BOT);
       const mask = maskGfx.createGeometryMask();
 
       // Scrolling strip container
-      const strip = scene.add.container(reelX + REEL_W / 2, slotY + 10);
+      const strip = scene.add.container(reelX + REEL_W / 2, slotY + CLIP_TOP);
       strip.setDepth(5);
 
       const symbols = [];
@@ -74,24 +76,23 @@ export class SlotMachine {
         symbols.push(sym);
         strip.add(sym);
       }
-      strip.y = slotY + 10;
 
       strip.setMask(mask);
 
-      // Flash overlay (for settle effect)
+      // Flash overlay
       const flash = scene.add.graphics();
       flash.fillStyle(0xFFFFFF, 1);
-      flash.fillRect(reelX, slotY + 10 + SYMBOL_H, REEL_W, SYMBOL_H);
+      flash.fillRect(reelX, slotY + CLIP_TOP + SYMBOL_H, REEL_W, SYMBOL_H);
       flash.setAlpha(0);
+      flash.setDepth(6);
 
-      // Result row highlight — translucent gold, 2px border top+bottom only
+      // Result row highlight
       const resultHighlight = scene.add.graphics();
       resultHighlight.lineStyle(2, COLOR.GOLD, 0.8);
-      resultHighlight.lineBetween(reelX, slotY + 10 + SYMBOL_H, reelX + REEL_W, slotY + 10 + SYMBOL_H);
-      resultHighlight.lineBetween(reelX, slotY + 10 + SYMBOL_H * 2, reelX + REEL_W, slotY + 10 + SYMBOL_H * 2);
-      // Subtle gold fill
+      resultHighlight.lineBetween(reelX, slotY + CLIP_TOP + SYMBOL_H, reelX + REEL_W, slotY + CLIP_TOP + SYMBOL_H);
+      resultHighlight.lineBetween(reelX, slotY + CLIP_TOP + SYMBOL_H * 2, reelX + REEL_W, slotY + CLIP_TOP + SYMBOL_H * 2);
       resultHighlight.fillStyle(COLOR.GOLD, 0.08);
-      resultHighlight.fillRect(reelX, slotY + 10 + SYMBOL_H, REEL_W, SYMBOL_H);
+      resultHighlight.fillRect(reelX, slotY + CLIP_TOP + SYMBOL_H, REEL_W, SYMBOL_H);
       resultHighlight.setDepth(10);
 
       this.reels.push({
@@ -100,6 +101,36 @@ export class SlotMachine {
         resultSymbol: null,
       });
     }
+
+    // Foreground covers — hide reel content that overflows the frame edges
+    this.covers = scene.add.graphics();
+    this.covers.setDepth(8);
+    this.covers.fillStyle(COLOR.BG_DARK, 1);
+
+    // Top edge cover (inside frame, above visible area)
+    this.covers.fillRect(slotX, slotY, SLOT_W, CLIP_TOP);
+
+    // Bottom edge cover (inside frame, below visible area)
+    this.covers.fillRect(slotX, slotY + SLOT_H - CLIP_BOT, SLOT_W, CLIP_BOT);
+
+    // Left padding cover
+    this.covers.fillRect(slotX, slotY + CLIP_TOP, PADDING, SLOT_H - CLIP_TOP - CLIP_BOT);
+
+    // Right padding cover
+    this.covers.fillRect(slotX + SLOT_W - PADDING, slotY + CLIP_TOP, PADDING, SLOT_H - CLIP_TOP - CLIP_BOT);
+
+    // Between-reel gap covers
+    for (let i = 0; i < REEL_COUNT - 1; i++) {
+      const gapX = innerX + i * (REEL_W + REEL_GAP) + REEL_W;
+      this.covers.fillRect(gapX, slotY + CLIP_TOP, REEL_GAP, SLOT_H - CLIP_TOP - CLIP_BOT);
+    }
+
+    // Frame border on top
+    const frameBorder = scene.add.graphics();
+    frameBorder.lineStyle(3, COLOR.BORDER, 1);
+    frameBorder.strokeRoundedRect(slotX, slotY, SLOT_W, SLOT_H, 24);
+    frameBorder.setDepth(11);
+    this.frameBorder = frameBorder;
   }
 
   _makeSymbol(index, symbolDef) {
@@ -108,11 +139,35 @@ export class SlotMachine {
     const container = this.scene.add.container(0, index * SYMBOL_H + SYMBOL_H / 2);
 
     if (symbolDef && symbolDef.id === 'jackpot') {
-      container.add(this.scene.add.image(0, 0, 'sym-jackpot').setDisplaySize(SYMBOL_W - 16, SYMBOL_H - 10));
+      const bg = this.scene.add.graphics();
+      bg.fillStyle(0x2A1A00, 1);
+      bg.lineStyle(2, COLOR.GOLD, 0.8);
+      bg.fillRoundedRect(-SYMBOL_W / 2 + 8, -SYMBOL_H / 2 + 5, SYMBOL_W - 16, SYMBOL_H - 10, 10);
+      bg.strokeRoundedRect(-SYMBOL_W / 2 + 8, -SYMBOL_H / 2 + 5, SYMBOL_W - 16, SYMBOL_H - 10, 10);
+      container.add(bg);
+      container.add(this.scene.add.text(0, 0, '★', {
+        ...FONT.UI, fontSize: `${Math.round(SYMBOL_H * 0.5)}px`, color: '#FFD700',
+      }).setOrigin(0.5));
     } else if (symbolDef && symbolDef.id === 'wild') {
-      container.add(this.scene.add.image(0, 0, 'sym-wild').setDisplaySize(SYMBOL_W - 16, SYMBOL_H - 10));
+      const bg = this.scene.add.graphics();
+      bg.fillStyle(0x1A0030, 1);
+      bg.lineStyle(2, COLOR.PURPLE, 0.8);
+      bg.fillRoundedRect(-SYMBOL_W / 2 + 8, -SYMBOL_H / 2 + 5, SYMBOL_W - 16, SYMBOL_H - 10, 10);
+      bg.strokeRoundedRect(-SYMBOL_W / 2 + 8, -SYMBOL_H / 2 + 5, SYMBOL_W - 16, SYMBOL_H - 10, 10);
+      container.add(bg);
+      container.add(this.scene.add.text(0, 0, 'W', {
+        ...FONT.UI, fontSize: `${Math.round(SYMBOL_H * 0.5)}px`, color: '#B060E0',
+      }).setOrigin(0.5));
     } else if (symbolDef && symbolDef.id === 'multiplier') {
-      container.add(this.scene.add.image(0, 0, 'sym-multiplier').setDisplaySize(SYMBOL_W - 16, SYMBOL_H - 10));
+      const bg = this.scene.add.graphics();
+      bg.fillStyle(0x2A1500, 1);
+      bg.lineStyle(2, COLOR.ORANGE_HOT, 0.8);
+      bg.fillRoundedRect(-SYMBOL_W / 2 + 8, -SYMBOL_H / 2 + 5, SYMBOL_W - 16, SYMBOL_H - 10, 10);
+      bg.strokeRoundedRect(-SYMBOL_W / 2 + 8, -SYMBOL_H / 2 + 5, SYMBOL_W - 16, SYMBOL_H - 10, 10);
+      container.add(bg);
+      container.add(this.scene.add.text(0, 0, '×2', {
+        ...FONT.UI, fontSize: `${Math.round(SYMBOL_H * 0.5)}px`, color: '#FF8C00',
+      }).setOrigin(0.5));
     } else {
       const bg = this.scene.add.graphics();
       bg.fillStyle(COLOR.BG_LIGHT, 1);
@@ -215,5 +270,7 @@ export class SlotMachine {
     });
     this.reels = [];
     if (this.frame) this.frame.destroy();
+    if (this.frameBorder) this.frameBorder.destroy();
+    if (this.covers) this.covers.destroy();
   }
 }

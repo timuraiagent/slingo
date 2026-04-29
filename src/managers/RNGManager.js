@@ -10,9 +10,9 @@ export class RNGManager {
     const neededNumbers = cardManager.getOpenNumbers();
     const base = this.rng.next();
 
-    const biasTable = { PERFECT: 0.55, GREAT: 0.45, GOOD: 0.35, MISS: 0.25 };
+    const biasTable = { PERFECT: 0.85, GREAT: 0.70, GOOD: 0.45, MISS: 0.20 };
     const pityBoost = Math.max(0, this.pityCounter - 3) * 0.10;
-    const targetBias = Math.min(biasTable[timingZone] + pityBoost, 0.60);
+    const targetBias = Math.min(biasTable[timingZone] + pityBoost, 0.95);
 
     if (base < targetBias && neededNumbers.length > 0) {
       return this.rng.pickFrom(neededNumbers);

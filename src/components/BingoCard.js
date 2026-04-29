@@ -23,17 +23,21 @@ export class BingoCard {
     this.HALF = HALF;
 
     const CARD_W = L.CARD_W;
+    const sf = L.sf;
 
-    // Card panel with border
+    // Card panel with border (offsets scaled by sf)
+    const panelPad = Math.round(16 * sf);
+    const panelHeader = Math.round(50 * sf);
+    const panelExtra = Math.round(70 * sf);
     this.panel = scene.add.graphics();
-    drawPanel(this.panel, x - 16, y - 50, CARD_W + 32, CARD_W + 70, 20, COLOR.BG_MID, COLOR.BORDER);
+    drawPanel(this.panel, x - panelPad, y - panelHeader, CARD_W + panelPad * 2, CARD_W + panelExtra, 20, COLOR.BG_MID, COLOR.BORDER);
 
     // Column headers
     this.headerTexts = [];
     for (let c = 0; c < 5; c++) {
       const hx = x + c * (CELL_SIZE + CELL_GAP) + HALF;
       this.headerTexts.push(
-        scene.add.text(hx, y - 18, HEADERS[c], {
+        scene.add.text(hx, y - Math.round(18 * sf), HEADERS[c], {
           ...FONT.UI, fontSize: `${Math.round(CELL_SIZE * 0.35)}px`, color: HEADER_COLORS[c],
         }).setOrigin(0.5)
       );
@@ -70,7 +74,7 @@ export class BingoCard {
     const HALF = this.HALF;
 
     const cx = this.x + col * (CELL_SIZE + CELL_GAP) + HALF;
-    const cy = this.y + row * (CELL_SIZE + CELL_GAP) + 20 + HALF;
+    const cy = this.y + row * (CELL_SIZE + CELL_GAP) + Math.round(20 * this.L.sf) + HALF;
 
     const bg = this.scene.add.graphics();
     if (number === 0) {

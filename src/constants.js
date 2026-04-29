@@ -42,7 +42,7 @@ export function computeLayout(W, H) {
 
   const SAFE_TOP = Math.round(44 * sf);
   const SAFE_BOTTOM = Math.round(60 * sf);
-  const HUD_HEIGHT = Math.round(80 * sf);
+  const HUD_HEIGHT = Math.round(110 * sf);
   const GAP = Math.round(28 * sf);
 
   const CELL_SIZE = Math.round(180 * sf);
@@ -64,8 +64,9 @@ export function computeLayout(W, H) {
   const timingY = slotY - TIMING_HEIGHT - GAP;
   const meterY = timingY - METER_HEIGHT - GAP;
 
+  const CARD_HEADER = Math.round(56 * sf);
   const cardX = (W - CARD_W) / 2;
-  const cardY = SAFE_TOP + HUD_HEIGHT + GAP;
+  const cardY = SAFE_TOP + HUD_HEIGHT + GAP + CARD_HEADER;
 
   const cx = W / 2;
 

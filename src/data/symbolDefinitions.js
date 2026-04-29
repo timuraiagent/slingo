@@ -1,6 +1,6 @@
 export const SYMBOLS = [
-  { id: 'number',     weight: 82 },
-  { id: 'jackpot',    weight: 8 },
-  { id: 'wild',       weight: 5 },
-  { id: 'multiplier', weight: 5 },
+  { id: 'number',     weight: 70 },
+  { id: 'jackpot',    weight: 10 },
+  { id: 'wild',       weight: 10 },
+  { id: 'multiplier', weight: 10 },
 ];

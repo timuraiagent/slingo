@@ -14,8 +14,8 @@ export class MeterBar {
 
     const sf = L.sf;
     const CARD_W = L.CARD_W;
-    const SEG_H = Math.round(36 * sf);
-    const SEG_GAP = Math.round(10 * sf);
+    const SEG_H = Math.round(56 * sf);
+    const SEG_GAP = Math.round(14 * sf);
     const SEG_W = Math.round((CARD_W - (SEGMENTS - 1) * SEG_GAP) / SEGMENTS);
     this.SEG_W = SEG_W;
     this.SEG_H = SEG_H;
@@ -23,7 +23,7 @@ export class MeterBar {
 
     // JACKPOT label
     scene.add.text(x + CARD_W / 2, y - 4, 'JACKPOT', {
-      ...FONT.UI, fontSize: `${Math.round(20 * sf)}px`, color: '#FFD700',
+      ...FONT.UI, fontSize: `${Math.round(48 * sf)}px`, color: '#FFD700',
     }).setOrigin(0.5, 1);
 
     for (let i = 0; i < SEGMENTS; i++) {

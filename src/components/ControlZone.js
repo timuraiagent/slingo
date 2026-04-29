@@ -74,6 +74,7 @@ export class ControlZone {
   }
 
   setSpinEnabled(enabled) {
+    this.spinBtn.setTexture('btn-spin-normal');
     this.spinBtn.setAlpha(enabled ? 1 : 0.4);
     if (enabled) {
       this.spinBtn.setInteractive();
