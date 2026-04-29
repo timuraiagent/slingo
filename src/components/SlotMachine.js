@@ -20,8 +20,8 @@ export class SlotMachine {
     const SYMBOL_H = L.SYMBOL_H;
     const REEL_W = SYMBOL_W;
     const REEL_H = SYMBOL_H * 3;
-    const REEL_GAP = Math.round(12 * L.sf);
-    const PADDING = Math.round(40 * L.sf);
+    const REEL_GAP = Math.round(8 * L.sf);
+    const PADDING = Math.floor(Math.min(40 * L.sf, (L.W - REEL_COUNT * REEL_W - (REEL_COUNT - 1) * REEL_GAP) / 2));
     const SLOT_W = REEL_COUNT * REEL_W + (REEL_COUNT - 1) * REEL_GAP + PADDING * 2;
     const SLOT_H = REEL_H;
 
@@ -66,6 +66,7 @@ export class SlotMachine {
 
       // Scrolling strip container
       const strip = scene.add.container(reelX + REEL_W / 2, slotY + 10);
+      strip.setDepth(5);
 
       const symbols = [];
       for (let s = 0; s < STRIP_LENGTH; s++) {
