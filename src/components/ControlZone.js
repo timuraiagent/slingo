@@ -10,15 +10,15 @@ export class ControlZone {
     this.fastMode = false;
     this.hasWildBall = false;
 
-    const sf = L.sf;
-    const btnY = y + Math.round(80 * sf);
+    const ch = L.CONTROL_HEIGHT;
+    const btnY = y + ch * 0.55;
     const spinX = x + W / 2;
-    const jackpotX = x + W * 0.2;
-    const speedX = x + W * 0.8;
+    const jackpotX = x + W * 0.18;
+    const speedX = x + W * 0.82;
 
-    // SPIN button — scale image to fit layout
-    const spinW = Math.round(160 * sf);
-    const spinH = Math.round(60 * sf);
+    // SPIN button — size relative to control zone height, with minimum
+    const spinW = Math.max(Math.round(ch * 0.9), 100);
+    const spinH = Math.max(Math.round(ch * 0.38), 44);
     this.spinBtn = scene.add.image(spinX, btnY, 'btn-spin-normal')
       .setDisplaySize(spinW, spinH)
       .setInteractive({ useHandCursor: true })
@@ -36,8 +36,8 @@ export class ControlZone {
     });
 
     // JACKPOT button
-    const jackpotW = Math.round(110 * sf);
-    const jackpotH = Math.round(50 * sf);
+    const jackpotW = Math.max(Math.round(ch * 0.55), 66);
+    const jackpotH = Math.max(Math.round(ch * 0.3), 36);
     this.jackpotBtn = scene.add.image(jackpotX, btnY, 'btn-jackpot-empty')
       .setDisplaySize(jackpotW, jackpotH)
       .setInteractive({ useHandCursor: true })
@@ -49,8 +49,8 @@ export class ControlZone {
     });
 
     // Speed toggle
-    const speedW = Math.round(50 * sf);
-    const speedH = Math.round(40 * sf);
+    const speedW = Math.max(Math.round(ch * 0.32), 40);
+    const speedH = Math.max(Math.round(ch * 0.28), 34);
     this.speedBtn = scene.add.image(speedX, btnY, 'btn-speed-normal')
       .setDisplaySize(speedW, speedH)
       .setInteractive({ useHandCursor: true })
@@ -63,8 +63,8 @@ export class ControlZone {
     });
 
     // Wild ball indicator
-    this.wildBadge = scene.add.text(jackpotX + Math.round(60 * sf), btnY - Math.round(40 * sf), '🌟', {
-      fontSize: `${Math.round(28 * sf)}px`,
+    this.wildBadge = scene.add.text(jackpotX + jackpotW / 2 + Math.round(ch * 0.2), btnY - Math.round(ch * 0.25), '🌟', {
+      fontSize: `${Math.max(Math.round(ch * 0.18), 18)}px`,
     }).setOrigin(0.5).setAlpha(0).setDepth(6).setInteractive({ useHandCursor: true });
 
     this.wildBadge.on('pointerdown', () => {

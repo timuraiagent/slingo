@@ -109,35 +109,38 @@ export class MatchScene extends Phaser.Scene {
     hudBar.lineStyle(1, 0x2A2A50, 0.6);
     hudBar.lineBetween(0, L.SAFE_TOP + L.HUD_HEIGHT, L.W, L.SAFE_TOP + L.HUD_HEIGHT);
 
-    const hudY = L.SAFE_TOP + 10;
-    const pillH = Math.round(44 * L.sf);
+    const hudY = L.SAFE_TOP + Math.max(Math.round(10 * L.sf), 4);
+    const pillH = Math.max(Math.round(44 * L.sf), 28);
     const pillR = pillH / 2;
+    const pillW = Math.max(Math.round(200 * L.sf), 100);
+    const hudFontSize = Math.max(Math.round(22 * L.sf), 14);
 
     // Position pill
+    const posPillX = Math.round(L.W * 0.03);
     const posPill = this.add.graphics();
     posPill.fillStyle(COLOR.BG_MID, 1);
     posPill.lineStyle(1.5, COLOR.BORDER, 1);
-    posPill.fillRoundedRect(20, hudY, 200, pillH, pillR);
-    posPill.strokeRoundedRect(20, hudY, 200, pillH, pillR);
+    posPill.fillRoundedRect(posPillX, hudY, pillW, pillH, pillR);
+    posPill.strokeRoundedRect(posPillX, hudY, pillW, pillH, pillR);
 
-    this.posText = this.add.text(120, hudY + pillH / 2, '1st / 8', {
-      ...FONT.UI, fontSize: `${Math.round(22 * L.sf)}px`, color: '#F0F0FF',
+    this.posText = this.add.text(posPillX + pillW / 2, hudY + pillH / 2, '1st / 8', {
+      ...FONT.UI, fontSize: `${hudFontSize}px`, color: '#F0F0FF',
     }).setOrigin(0.5);
 
     // Timer pill
-    const timerPillX = L.W - 220;
+    const timerPillX = L.W - posPillX - pillW;
     const timerPill = this.add.graphics();
     timerPill.fillStyle(COLOR.BG_MID, 1);
     timerPill.lineStyle(1.5, COLOR.BORDER, 1);
-    timerPill.fillRoundedRect(timerPillX, hudY, 200, pillH, pillR);
-    timerPill.strokeRoundedRect(timerPillX, hudY, 200, pillH, pillR);
+    timerPill.fillRoundedRect(timerPillX, hudY, pillW, pillH, pillR);
+    timerPill.strokeRoundedRect(timerPillX, hudY, pillW, pillH, pillR);
 
-    this.timerText = this.add.text(timerPillX + 100, hudY + pillH / 2, '0:00', {
-      ...FONT.UI, fontSize: `${Math.round(22 * L.sf)}px`, color: '#F0F0FF',
+    this.timerText = this.add.text(timerPillX + pillW / 2, hudY + pillH / 2, '0:00', {
+      ...FONT.UI, fontSize: `${hudFontSize}px`, color: '#F0F0FF',
     }).setOrigin(0.5);
 
-    // Streak badge pill (in HUD, right-center)
-    const streakPillW = Math.round(180 * L.sf);
+    // Streak badge pill (in HUD, center)
+    const streakPillW = Math.max(Math.round(180 * L.sf), 90);
     const streakPillX = L.cx - streakPillW / 2;
     this.streakPill = this.add.graphics();
     this.streakPill.fillStyle(COLOR.BG_MID, 1);
@@ -146,7 +149,7 @@ export class MatchScene extends Phaser.Scene {
     this.streakPill.strokeRoundedRect(streakPillX, hudY, streakPillW, pillH, pillR);
 
     this.streakHudText = this.add.text(L.cx, hudY + pillH / 2, '🔥 ×0', {
-      ...FONT.UI, fontSize: `${Math.round(22 * L.sf)}px`, color: '#FFFFFF',
+      ...FONT.UI, fontSize: `${hudFontSize}px`, color: '#FFFFFF',
     }).setOrigin(0.5);
 
     // Update position + timer every 3 seconds
@@ -489,10 +492,10 @@ export class MatchScene extends Phaser.Scene {
     if (!this.streakHudText || !this.streakHudText.active) return;
     this.streakHudText.setText(`🔥 ×${count}`);
 
-    const pillH = Math.round(44 * L.sf);
-    const streakPillW = Math.round(180 * L.sf);
+    const pillH = Math.max(Math.round(44 * L.sf), 28);
+    const streakPillW = Math.max(Math.round(180 * L.sf), 90);
     const streakPillX = L.cx - streakPillW / 2;
-    const hudY = L.SAFE_TOP + 10;
+    const hudY = L.SAFE_TOP + Math.max(Math.round(10 * L.sf), 4);
 
     if (this.streakPill && this.streakPill.active) {
       this.streakPill.clear();

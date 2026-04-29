@@ -1,5 +1,4 @@
 // Layout constants — sizes are computed dynamically in scenes using computeLayout()
-// These are BASE reference values for the 1080×2340 design spec
 
 export const BASE_W = 1080;
 export const BASE_H = 2340;
@@ -40,37 +39,47 @@ export const DEBUG_FLAGS = {
 const params = new URLSearchParams(window.location.search);
 export const DEBUG_MODE = params.has('debug') && params.get('debug') === '1';
 
-// Dynamic layout computation — call from scene.create() after getting W, H
+// Dynamic layout — bottom sections get minimum usable sizes,
+// card fills whatever space remains.
 export function computeLayout(W, H) {
   const sf = Math.min(W / BASE_W, H / BASE_H);
 
-  const SAFE_TOP = Math.round(40 * sf);
-  const SAFE_BOTTOM = Math.round(60 * sf);
-  const HUD_HEIGHT = Math.round(70 * sf);
-  const GAP = Math.round(32 * sf);
+  // Fixed sections with minimums for usability
+  const SAFE_TOP = Math.max(Math.round(40 * sf), 16);
+  const SAFE_BOTTOM = Math.max(Math.round(60 * sf), 24);
+  const HUD_HEIGHT = Math.max(Math.round(70 * sf), 36);
+  const GAP = Math.max(Math.round(24 * sf), 8);
 
-  const CELL_SIZE = Math.round(180 * sf * 1.12); // 12% bigger cells
-  const CELL_GAP = Math.round(14 * sf);
-  const CARD_SIZE = 5;
-  const CARD_W = CARD_SIZE * CELL_SIZE + (CARD_SIZE - 1) * CELL_GAP;
+  const CONTROL_HEIGHT = Math.max(Math.round(220 * sf), 100);
+  const SLOT_HEIGHT = Math.max(Math.round(420 * sf), 156);
+  const TIMING_HEIGHT = Math.max(Math.round(140 * sf), 48);
+  const METER_HEIGHT = Math.max(Math.round(80 * sf), 32);
 
-  const CONTROL_HEIGHT = Math.round(220 * sf);
-  const SLOT_HEIGHT = Math.round(420 * sf); // taller slots for readability
-  const TIMING_HEIGHT = Math.round(140 * sf); // proper 140px height
-  const METER_HEIGHT = Math.round(80 * sf);
-
-  // Slot symbol sizing
-  const SYMBOL_W = Math.round(CELL_SIZE);
-  const SYMBOL_H = Math.round(SLOT_HEIGHT / 3);
-
-  // Bottom-up layout
+  // Bottom-up layout — these are fixed
   const controlY = H - SAFE_BOTTOM - CONTROL_HEIGHT;
   const slotY = controlY - SLOT_HEIGHT - GAP;
   const timingY = slotY - TIMING_HEIGHT - GAP;
   const meterY = timingY - METER_HEIGHT - GAP;
 
+  // Card fills remaining space between HUD and meter
+  const cardTop = SAFE_TOP + HUD_HEIGHT + GAP;
+  const cardAvailH = meterY - cardTop - GAP; // space for card + small margin
+  const cardAvailW = W - Math.round(16 * sf) * 2;
+
+  // Compute cell size to fit within available space
+  const CARD_SIZE = 5;
+  const CELL_GAP = Math.max(Math.round(14 * sf), 4);
+  // Card is square (5×5), so size = min(availW, availH)
+  const maxCardSide = Math.min(cardAvailW, cardAvailH);
+  const CELL_SIZE = Math.max(Math.floor((maxCardSide - (CARD_SIZE - 1) * CELL_GAP) / CARD_SIZE), 40);
+  const CARD_W = CARD_SIZE * CELL_SIZE + (CARD_SIZE - 1) * CELL_GAP;
+
   const cardX = (W - CARD_W) / 2;
-  const cardY = SAFE_TOP + HUD_HEIGHT + GAP;
+  const cardY = cardTop;
+
+  // Slot symbol sizing
+  const SYMBOL_W = Math.round(CELL_SIZE);
+  const SYMBOL_H = Math.round(SLOT_HEIGHT / 3);
 
   const cx = W / 2;
 
