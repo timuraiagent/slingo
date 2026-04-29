@@ -42,7 +42,7 @@ export class PreloadScene extends Phaser.Scene {
       'cell-close', 'bingo-win', 'pressure-start',
     ];
     audioKeys.forEach((k) => {
-      this.load.audio(k, `assets/audio/${k}.mp3`);
+      this.load.audio(k, `audio/${k}.mp3`);
     });
   }
 
