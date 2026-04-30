@@ -125,7 +125,7 @@ export class MatchScene extends Phaser.Scene {
     posPill.fillRoundedRect(posPillX, hudY, pillW, pillH, pillR);
     posPill.strokeRoundedRect(posPillX, hudY, pillW, pillH, pillR);
 
-    this.posText = this.add.text(posPillX + pillW / 2, hudY + pillH / 2, '1st / 8', {
+    this.posText = this.add.text(posPillX + pillW / 2, hudY + pillH / 2, '1st / 1', {
       ...FONT.UI, fontSize: `${hudFontSize}px`, color: '#F0F0FF',
     }).setOrigin(0.5);
 
@@ -180,7 +180,7 @@ export class MatchScene extends Phaser.Scene {
         if (!this.matchActive) return;
         const pos = this.leaderboardManager.getPosition();
         const ord = this._ordinal(pos);
-        this.posText.setText(`${ord} / 8`);
+        this.posText.setText(`${ord} / 1`);
       },
       loop: true,
     });
@@ -324,7 +324,8 @@ export class MatchScene extends Phaser.Scene {
     this.stateMachine.setState(STATES.IDLE);
     this.matchActive = true;
     this._enableSpin();
-    this.botManager.start();
+    // Bots disabled for single-player mode
+    // this.botManager.start();
     this.timingBar.activate(this.controlZone.fastMode);
   }
 
@@ -582,11 +583,11 @@ export class MatchScene extends Phaser.Scene {
     this.stateMachine.setState(STATES.IDLE);
     this._enableSpin();
 
-    // 50-spin limit or 5-minute limit
-    if (this.spinCount >= 50 || this.matchTimer >= 300) {
-      this._endMatch('bot', null);
-      return;
-    }
+    // No spin/time limit in single-player — play until bingo
+    // if (this.spinCount >= 50 || this.matchTimer >= 300) {
+    //   this._endMatch('bot', null);
+    //   return;
+    // }
 
     // Check deferred bot win
     if (this._pendingBotWin) {
@@ -931,10 +932,10 @@ export class MatchScene extends Phaser.Scene {
   }
 
   _buildMatchResults() {
-    const position = this.leaderboardManager.getPosition();
+    const position = 1; // Single player — always 1st
     return {
       position,
-      totalPlayers: 8,
+      totalPlayers: 1,
       cellsClosed: this.cardManager.getClosedCount(),
       bestStreak: this.streakManager.best,
       jackpotsUsed: this.jackpotUsedCount,
