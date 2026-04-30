@@ -21,7 +21,7 @@ export class HelpDialog {
 
     // Panel
     const panelW = Math.min(Math.round(900 * sf), W - 40);
-    const panelH = Math.round(1900 * sf);
+    const panelH = Math.round(2100 * sf);
     const panelX = (W - panelW) / 2;
     const panelY = Math.round(60 * sf);
     const cornerR = 24;
