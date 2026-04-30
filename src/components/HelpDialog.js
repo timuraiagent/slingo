@@ -154,7 +154,7 @@ export class HelpDialog {
     // Special symbols — two rows each: symbol+name on first, description on second
     y = this._addSectionHeader('SPECIAL SYMBOLS', 0, y);
     const symbols = [
-      { symbol: '★', color: '#FFD700', name: 'JACKPOT', desc: 'Instantly adds +30 meter fill' },
+      { symbol: '★', color: '#FFD700', name: 'JACKPOT', desc: 'Fills 30% of the jackpot meter' },
       { symbol: 'W', color: '#B060E0', name: 'WILD', desc: 'Pick a column — next spin guaranteed match' },
       { symbol: '×2', color: '#FF8C00', name: 'MULTIPLIER', desc: 'Doubles next spin\'s meter fill' },
     ];
