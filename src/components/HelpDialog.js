@@ -39,21 +39,23 @@ export class HelpDialog {
     this.content.setDepth(57);
     this._add(this.content);
 
-    // Covers to hide overflow — inset so they don't cover panel border/corners
-    const coverPad = 6;
+    // Covers to hide content overflow — placed outside panel border
+    // Top cover: covers area from top of screen to just inside panel top border
+    const topCoverH = panelY + 3;
     const topCover = scene.add.rectangle(
-      panelX + panelW / 2, panelY / 2,
-      panelW - coverPad * 2, panelY - cornerR + 2,
+      panelX + panelW / 2, topCoverH / 2,
+      panelW + 20, topCoverH + 4,
       COLOR.BG_DARK, 1
     );
     topCover.setDepth(58);
     this._add(topCover);
 
-    const bottomStripTop = panelY + panelH - cornerR;
-    const bottomStripH = H - bottomStripTop;
+    // Bottom cover: covers area from just inside panel bottom to bottom of screen
+    const bottomCoverTop = panelY + panelH - 3;
+    const bottomCoverH = H - bottomCoverTop + 4;
     const bottomCover = scene.add.rectangle(
-      panelX + panelW / 2, bottomStripTop + bottomStripH / 2,
-      panelW - coverPad * 2, bottomStripH + 4,
+      panelX + panelW / 2, bottomCoverTop + bottomCoverH / 2,
+      panelW + 20, bottomCoverH + 4,
       COLOR.BG_DARK, 1
     );
     bottomCover.setDepth(58);
@@ -110,27 +112,21 @@ export class HelpDialog {
       ['MISS',    '25% hit chance', '#E74C3C'],
     ];
     zones.forEach(([label, desc, color]) => {
-      const row = this.scene.add.container(0, y);
-      const lbl = this.scene.add.text(-halfW + pad, 0, label, {
+      const lbl = this.scene.add.text(0, y, label, {
         ...FONT.UI, fontSize: `${Math.round(38 * sf)}px`, color,
-      }).setOrigin(0, 0);
-      const dsc = this.scene.add.text(0, 0, '— ' + desc, {
-        ...FONT.LABEL, fontSize: `${Math.round(36 * sf)}px`, color: '#A0A0C0',
-      }).setOrigin(0, 0);
-      // Position description after label
-      dsc.setX(lbl.x + lbl.width + Math.round(12 * sf));
-      row.add([lbl, dsc]);
-      this.content.add(row);
-      this._add(row);
-      const rowH = Math.max(lbl.height, dsc.height);
-      // If description overflows right edge, move it below the label
-      if (dsc.x + dsc.width > halfW - pad) {
-        dsc.setX(lbl.x);
-        dsc.setY(lbl.height + Math.round(4 * sf));
-        y += lbl.height + dsc.height + Math.round(10 * sf);
-      } else {
-        y += rowH + Math.round(10 * sf);
-      }
+      }).setOrigin(0.5, 0);
+      lbl.setDepth(57);
+      this.content.add(lbl);
+      this._add(lbl);
+      y += lbl.height + Math.round(4 * sf);
+
+      const dsc = this.scene.add.text(0, y, desc, {
+        ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#A0A0C0',
+      }).setOrigin(0.5, 0);
+      dsc.setDepth(57);
+      this.content.add(dsc);
+      this._add(dsc);
+      y += dsc.height + Math.round(10 * sf);
     });
 
     y += Math.round(10 * sf);
@@ -160,20 +156,17 @@ export class HelpDialog {
     ];
     symbols.forEach(s => {
       const row = this.scene.add.container(0, y);
-      const sym = this.scene.add.text(-halfW + pad, 0, s.symbol, {
-        ...FONT.UI, fontSize: `${Math.round(40 * sf)}px`, color: s.color,
-      }).setOrigin(0, 0);
-      const name = this.scene.add.text(-halfW + pad + Math.round(60 * sf), 0, s.name, {
-        ...FONT.UI, fontSize: `${Math.round(36 * sf)}px`, color: '#F0F0FF',
-      }).setOrigin(0, 0);
-      const desc = this.scene.add.text(-halfW + pad + Math.round(16 * sf), Math.max(sym.height, name.height) + Math.round(4 * sf), s.desc, {
+      const sym = this.scene.add.text(0, 0, s.symbol + ' ' + s.name, {
+        ...FONT.UI, fontSize: `${Math.round(38 * sf)}px`, color: s.color,
+      }).setOrigin(0.5, 0);
+      const desc = this.scene.add.text(0, sym.height + Math.round(4 * sf), s.desc, {
         ...FONT.LABEL, fontSize: `${Math.round(34 * sf)}px`, color: '#A0A0C0',
-        wordWrap: { width: panelW - pad * 2 - Math.round(16 * sf) },
-      }).setOrigin(0, 0);
-      row.add([sym, name, desc]);
+        wordWrap: { width: panelW - pad * 2 },
+      }).setOrigin(0.5, 0);
+      row.add([sym, desc]);
       this.content.add(row);
       this._add(row);
-      y += Math.max(sym.height, name.height) + desc.height + Math.round(18 * sf);
+      y += sym.height + desc.height + Math.round(16 * sf);
     });
 
     y += Math.round(20 * sf);
