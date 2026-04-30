@@ -97,17 +97,17 @@ export class HelpDialog {
 
     // Timing bar
     y = this._addSectionHeader('TIMING BAR', 0, y);
-    const timingHint = this._addText('Hit SPIN when the marker is in the zone:', 0, y, {
+    const timingHint = this._addText('Better timing = better chance to hit your open cells:', 0, y, {
       ...FONT.LABEL, fontSize: `${Math.round(36 * sf)}px`, color: '#A0A0C0',
       wordWrap: { width: panelW - pad * 2 },
     });
     y = timingHint.y + timingHint.height + Math.round(10 * sf);
 
     const zones = [
-      ['PERFECT', 'Best meter fill', '#2ECC71'],
-      ['GREAT',   'Strong meter fill', '#FFD700'],
-      ['GOOD',    'Decent meter fill', '#FF8C00'],
-      ['MISS',    'Minimal meter fill', '#E74C3C'],
+      ['PERFECT', '55% hit chance', '#2ECC71'],
+      ['GREAT',   '45% hit chance', '#FFD700'],
+      ['GOOD',    '35% hit chance', '#FF8C00'],
+      ['MISS',    '25% hit chance', '#E74C3C'],
     ];
     zones.forEach(([label, desc, color]) => {
       const row = this.scene.add.container(0, y);
@@ -138,12 +138,12 @@ export class HelpDialog {
 
     // Jackpot meter
     y = this._addSectionHeader('JACKPOT METER', 0, y);
-    const meterNote = this._addText('Fill 5 segments → earn a jackpot ball', 0, y, {
+    const meterNote = this._addText('Matching numbers fills the meter — full meter = jackpot ball!', 0, y, {
       ...FONT.LABEL, fontSize: `${Math.round(38 * sf)}px`, color: '#A0A0C0',
       wordWrap: { width: panelW - pad * 2 },
     });
     y = meterNote.y + meterNote.height + Math.round(10 * sf);
-    const jackpotNote = this._addText('★ = +30 meter fill  |  Ball closes ANY cell', 0, y, {
+    const jackpotNote = this._addText('Jackpot ball closes ANY open cell on your card', 0, y, {
       ...FONT.LABEL, fontSize: `${Math.round(38 * sf)}px`, color: '#FFD700',
       wordWrap: { width: panelW - pad * 2 },
     });
@@ -155,7 +155,7 @@ export class HelpDialog {
     y = this._addSectionHeader('SPECIAL SYMBOLS', 0, y);
     const symbols = [
       { symbol: '★', color: '#FFD700', name: 'JACKPOT', desc: 'Instantly adds +30 meter fill' },
-      { symbol: 'W', color: '#B060E0', name: 'WILD', desc: 'Pick column — next spin guaranteed match' },
+      { symbol: 'W', color: '#B060E0', name: 'WILD', desc: 'Pick a column — next spin guaranteed match' },
       { symbol: '×2', color: '#FF8C00', name: 'MULTIPLIER', desc: 'Doubles next spin\'s meter fill' },
     ];
     symbols.forEach(s => {
